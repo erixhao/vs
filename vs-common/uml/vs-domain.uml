@@ -3,104 +3,104 @@
   <ID>JAVA</ID>
   <OriginalElement />
   <nodes>
-    <node x="-151.48627450980396" y="-61.0">com.vs.common.domain.TradeAction</node>
-    <node x="23.0" y="-61.0">com.vs.common.domain.AbstractMarketData</node>
-    <node x="-267.0" y="97.0">com.vs.common.domain.AbstractBook</node>
-    <node x="-16.52205882352945" y="18.0">com.vs.common.domain.HistoricalData</node>
-    <node x="-123.5" y="176.0">com.vs.common.domain.TradingBook</node>
-    <node x="-225.48627450980396" y="-61.0">com.vs.common.domain.PnL</node>
-    <node x="-73.10539215686279" y="-150.0">com.vs.common.domain.Stock</node>
-    <node x="-142.52205882352945" y="18.0">com.vs.common.domain.Transaction</node>
-    <node x="125.47794117647055" y="18.0">com.vs.common.domain.LiveData</node>
+    <node x="-139.03172905525852" y="-46.45454545454544">com.vs.common.domain.TradeAction</node>
+    <node x="35.45454545454547" y="-46.45454545454544">com.vs.common.domain.AbstractMarketData</node>
+    <node x="-254.54545454545453" y="111.54545454545456">com.vs.common.domain.AbstractBook</node>
+    <node x="-4.067513368984038" y="32.54545454545456">com.vs.common.domain.HistoricalData</node>
+    <node x="-111.04545454545453" y="190.54545454545456">com.vs.common.domain.TradingBook</node>
+    <node x="-213.03172905525852" y="-46.45454545454544">com.vs.common.domain.PnL</node>
+    <node x="-60.65084670231735" y="-135.45454545454544">com.vs.common.domain.Stock</node>
+    <node x="-130.067513368984" y="32.54545454545456">com.vs.common.domain.Transaction</node>
+    <node x="137.93248663101596" y="32.54545454545456">com.vs.common.domain.LiveData</node>
   </nodes>
   <notes />
   <edges>
     <edge source="com.vs.common.domain.Transaction" target="com.vs.common.domain.Stock">
       <point x="35.333333333333336" y="-14.5" />
-      <point x="-54.188725490196134" y="-7.0" />
-      <point x="-18.070098039215708" y="-7.0" />
-      <point x="-18.070098039215708" y="-81.0" />
-      <point x="-39.60539215686279" y="-81.0" />
+      <point x="-41.734180035650695" y="7.545454545454561" />
+      <point x="-5.615552584670269" y="7.545454545454561" />
+      <point x="-5.615552584670269" y="-66.45454545454544" />
+      <point x="-27.150846702317352" y="-66.45454545454544" />
       <point x="0.0" y="14.5" />
     </edge>
     <edge source="com.vs.common.domain.TradingBook" target="com.vs.common.domain.Transaction">
       <point x="0.0" y="-14.5" />
-      <point x="-68.0" y="151.0" />
-      <point x="-63.02205882352945" y="151.0" />
+      <point x="-55.54545454545453" y="165.54545454545456" />
+      <point x="-50.56751336898404" y="165.54545454545456" />
       <point x="26.5" y="14.5" />
     </edge>
     <edge source="com.vs.common.domain.TradeAction" target="com.vs.common.domain.Stock">
       <point x="0.0" y="-14.5" />
-      <point x="-97.48627450980396" y="-81.0" />
-      <point x="-53.0053921568628" y="-81.0" />
-      <point x="-13.400000000000002" y="14.5" />
+      <point x="-85.03172905525852" y="-66.45454545454544" />
+      <point x="-40.55084670231736" y="-66.45454545454544" />
+      <point x="-13.400000000000006" y="14.5" />
     </edge>
     <edge source="com.vs.common.domain.AbstractMarketData" target="com.vs.common.domain.Stock">
       <point x="0.0" y="-14.5" />
-      <point x="101.5" y="-91.0" />
-      <point x="-26.205392156862786" y="-91.0" />
+      <point x="113.95454545454547" y="-76.45454545454544" />
+      <point x="-13.750846702317347" y="-76.45454545454544" />
       <point x="13.399999999999999" y="14.5" />
     </edge>
     <edge source="com.vs.common.domain.AbstractBook" target="com.vs.common.domain.Transaction">
       <point x="38.66666666666666" y="-14.5" />
-      <point x="-170.33333333333334" y="72.0" />
-      <point x="-116.02205882352945" y="72.0" />
+      <point x="-157.87878787878788" y="86.54545454545456" />
+      <point x="-103.56751336898404" y="86.54545454545456" />
       <point x="-26.5" y="14.5" />
     </edge>
     <edge source="com.vs.common.domain.LiveData" target="com.vs.common.domain.AbstractMarketData">
       <point x="0.0" y="-14.5" />
-      <point x="168.47794117647055" y="-7.0" />
-      <point x="140.75" y="-7.0" />
+      <point x="180.93248663101596" y="7.545454545454561" />
+      <point x="153.20454545454547" y="7.545454545454561" />
       <point x="39.25" y="14.5" />
     </edge>
     <edge source="com.vs.common.domain.TradingBook" target="com.vs.common.domain.Stock">
       <point x="37.0" y="-14.5" />
-      <point x="-31.0" y="151.0" />
-      <point x="221.97794117647055" y="151.0" />
-      <point x="221.97794117647055" y="-101.0" />
-      <point x="-12.805392156862808" y="-101.0" />
+      <point x="-18.545454545454533" y="165.54545454545456" />
+      <point x="234.43248663101596" y="165.54545454545456" />
+      <point x="234.43248663101596" y="-86.45454545454544" />
+      <point x="-0.35084670231734094" y="-86.45454545454544" />
       <point x="26.799999999999997" y="14.5" />
     </edge>
     <edge source="com.vs.common.domain.AbstractBook" target="com.vs.common.domain.PnL">
       <point x="0.0" y="-14.5" />
-      <point x="-209.0" y="72.0" />
-      <point x="-211.98627450980396" y="72.0" />
+      <point x="-196.54545454545453" y="86.54545454545456" />
+      <point x="-199.53172905525852" y="86.54545454545456" />
       <point x="-13.5" y="14.5" />
     </edge>
     <edge source="com.vs.common.domain.TradingBook" target="com.vs.common.domain.AbstractBook">
       <point x="-37.0" y="-14.5" />
-      <point x="-105.0" y="151.0" />
-      <point x="-209.0" y="151.0" />
+      <point x="-92.54545454545453" y="165.54545454545456" />
+      <point x="-196.54545454545453" y="165.54545454545456" />
       <point x="0.0" y="14.5" />
     </edge>
     <edge source="com.vs.common.domain.Transaction" target="com.vs.common.domain.TradeAction">
-      <point x="-7.105427357601002E-15" y="-14.5" />
-      <point x="-89.52205882352948" y="-7.0" />
-      <point x="-97.48627450980396" y="-7.0" />
+      <point x="0.0" y="-14.5" />
+      <point x="-77.06751336898404" y="7.545454545454561" />
+      <point x="-85.03172905525852" y="7.545454545454561" />
       <point x="0.0" y="14.5" />
     </edge>
     <edge source="com.vs.common.domain.AbstractBook" target="com.vs.common.domain.Stock">
       <point x="-38.66666666666666" y="-14.5" />
-      <point x="-247.66666666666666" y="72.0" />
-      <point x="-235.98627450980396" y="72.0" />
-      <point x="-235.98627450980396" y="-91.0" />
-      <point x="-66.40539215686277" y="-91.0" />
+      <point x="-235.2121212121212" y="86.54545454545456" />
+      <point x="-223.53172905525852" y="86.54545454545456" />
+      <point x="-223.53172905525852" y="-76.45454545454544" />
+      <point x="-53.950846702317364" y="-76.45454545454544" />
       <point x="-26.799999999999997" y="14.5" />
     </edge>
     <edge source="com.vs.common.domain.HistoricalData" target="com.vs.common.domain.AbstractMarketData">
       <point x="0.0" y="-14.5" />
-      <point x="44.47794117647055" y="-7.0" />
-      <point x="62.25" y="-7.0" />
+      <point x="56.93248663101596" y="7.545454545454561" />
+      <point x="74.70454545454547" y="7.545454545454561" />
       <point x="-39.25" y="14.5" />
     </edge>
     <edge source="com.vs.common.domain.Transaction" target="com.vs.common.domain.PnL">
       <point x="-35.33333333333334" y="-14.5" />
-      <point x="-124.85539215686282" y="-7.0" />
-      <point x="-184.98627450980396" y="-7.0" />
+      <point x="-112.40084670231735" y="7.545454545454561" />
+      <point x="-172.53172905525852" y="7.545454545454561" />
       <point x="13.5" y="14.5" />
     </edge>
   </edges>
-  <settings layout="Hierarchic Group" zoom="1.0" x="102.5" y="118.5" />
+  <settings layout="Hierarchic Group" zoom="1.1" x="102.5" y="118.49999999999997" />
   <SelectedNodes />
   <Categories />
   <SCOPE>All</SCOPE>
