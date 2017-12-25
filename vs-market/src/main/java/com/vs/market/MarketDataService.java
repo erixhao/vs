@@ -4,7 +4,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.vs.common.domain.HistoricalData;
 import com.vs.common.domain.LiveData;
-import com.vs.common.domain.enums.MarketIndex;
+import com.vs.common.domain.enums.MarketIndexs;
 import com.vs.common.domain.enums.TimePeriod;
 import com.vs.common.utils.*;
 import com.vs.dao.MarketDataDAO;
@@ -76,19 +76,19 @@ public class MarketDataService {
     private static void ensureIndexsData(){
         String years = DateUtils.toMarketDate(DateUtils.getMarketDateByMonths(LAST_MONTHS_WINDOW));
 
-        if ( dailyMarketDatas.get(MarketIndex.ShanghaiCompositeIndex.getSinaCode()) == null ){
-            List<HistoricalData> sh = marketDataDAO.getAllMarketDataByYears(MarketIndex.ShanghaiCompositeIndex.getSinaCode(), years);
-            dailyMarketDatas.put(MarketIndex.ShanghaiCompositeIndex.getSinaCode(), sh);
+        if ( dailyMarketDatas.get(MarketIndexs.ShanghaiCompositeIndex.getSinaCode()) == null ){
+            List<HistoricalData> sh = marketDataDAO.getAllMarketDataByYears(MarketIndexs.ShanghaiCompositeIndex.getSinaCode(), years);
+            dailyMarketDatas.put(MarketIndexs.ShanghaiCompositeIndex.getSinaCode(), sh);
         }
 
-        if ( dailyMarketDatas.get(MarketIndex.ShenzhenComponentIndex.getSinaCode()) == null ){
-            List<HistoricalData> sz = marketDataDAO.getAllMarketDataByYears(MarketIndex.ShenzhenComponentIndex.getSinaCode(), years);
-            dailyMarketDatas.put(MarketIndex.ShenzhenComponentIndex.getSinaCode(), sz);
+        if ( dailyMarketDatas.get(MarketIndexs.ShenzhenComponentIndex.getSinaCode()) == null ){
+            List<HistoricalData> sz = marketDataDAO.getAllMarketDataByYears(MarketIndexs.ShenzhenComponentIndex.getSinaCode(), years);
+            dailyMarketDatas.put(MarketIndexs.ShenzhenComponentIndex.getSinaCode(), sz);
         }
 
-        if ( dailyMarketDatas.get(MarketIndex.GrowthEnterpriseIndex.getSinaCode()) == null ){
-            List<HistoricalData> gw = marketDataDAO.getAllMarketDataByYears(MarketIndex.GrowthEnterpriseIndex.getSinaCode(), years);
-            dailyMarketDatas.put(MarketIndex.GrowthEnterpriseIndex.getSinaCode(), gw);
+        if ( dailyMarketDatas.get(MarketIndexs.GrowthEnterpriseIndex.getSinaCode()) == null ){
+            List<HistoricalData> gw = marketDataDAO.getAllMarketDataByYears(MarketIndexs.GrowthEnterpriseIndex.getSinaCode(), years);
+            dailyMarketDatas.put(MarketIndexs.GrowthEnterpriseIndex.getSinaCode(), gw);
         }
     }
 
@@ -160,10 +160,10 @@ public class MarketDataService {
 
 
     public List<HistoricalData> getShanghaiIndexHistoricalData() {
-        return dailyMarketDatas.get(MarketIndex.ShanghaiCompositeIndex);
+        return dailyMarketDatas.get(MarketIndexs.ShanghaiCompositeIndex);
     }
 
-    public List<HistoricalData> getMarketIndexHistoricalData(MarketIndex index) {
+    public List<HistoricalData> getMarketIndexHistoricalData(MarketIndexs index) {
         return dailyMarketDatas.get(index.getSinaCode());
     }
 
@@ -209,12 +209,12 @@ public class MarketDataService {
     }*/
 
 
-    public LiveData getMarketLiveData(MarketIndex index) {
+    public LiveData getMarketLiveData(MarketIndexs index) {
         return this.liveDataService.getMarketData(index);
     }
 
 
-    public Map<String, LiveData> getMarketLiveData(MarketIndex[] indexs) {
+    public Map<String, LiveData> getMarketLiveData(MarketIndexs[] indexs) {
         return this.liveDataService.getMarketLiveData(indexs);
     }
 

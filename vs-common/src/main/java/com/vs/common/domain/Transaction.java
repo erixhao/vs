@@ -1,8 +1,8 @@
 package com.vs.common.domain;
 
 
+import com.vs.common.domain.enums.Strategies;
 import com.vs.common.domain.enums.TradeDirection;
-import com.vs.common.domain.enums.TradeStrategy;
 import com.vs.common.utils.Constants;
 import lombok.Getter;
 import lombok.Setter;
@@ -15,15 +15,14 @@ import java.util.Date;
  */
 
 public class Transaction implements Comparable<Transaction> {
-
+	@Getter
+	private Stock stock;
 	@Getter
 	@Setter
 	private Date date;
 	@Getter
 	@Setter
 	private TradeDirection direction;
-	@Getter
-	private Stock stock;
 	@Getter
 	@Setter
 	private double price;
@@ -37,20 +36,20 @@ public class Transaction implements Comparable<Transaction> {
 	private boolean closed = false;
 	@Getter
 	@Setter
-	private TradeStrategy strategy;
+	private Strategies strategy;
 	@Getter
 	@Setter
-	private boolean isDividentSplit;
+	private boolean isDividendsSplit;
 	@Getter
 	@Setter
-	private Order openAction;
+	private TradeAction openAction;
 	@Getter
 	@Setter
-	private Order closeAction;
+	private TradeAction closeAction;
 
 	@Getter
 	@Setter
-	private PnL currentTadeProfit;
+	private PnL currentTradePnL;
 	
 	
 
@@ -58,11 +57,11 @@ public class Transaction implements Comparable<Transaction> {
 	}
 
 	public Transaction(Date date, TradeDirection direction, Stock stock, double price, long positions) {
-		this(date, direction, stock, TradeStrategy.NONE, price, positions);
+		this(date, direction, stock, Strategies.NONE, price, positions);
 	}
 
-	public Transaction(Date date, TradeDirection direction, Stock stock, TradeStrategy strategy, double price,
-			long positions) {
+	public Transaction(Date date, TradeDirection direction, Stock stock, Strategies strategy, double price,
+					   long positions) {
 		this.date = date;
 		this.direction = direction;
 		this.stock = stock;
@@ -164,8 +163,8 @@ public class Transaction implements Comparable<Transaction> {
 				", netPositions=" + netPositions +
 				", profit=" + this.getProfit(this.getPrice()) +
 				", closed=" + closed +
-				", isDividentSplit=" + isDividentSplit +
-				", TradeStrategy=" + strategy +
+				", isDividendsSplit=" + isDividendsSplit +
+				", Strategies=" + strategy +
 				", CloseAction = " + (closeAction == null ? "NULL" : closeAction.toString()) +
 				'}';
 	}

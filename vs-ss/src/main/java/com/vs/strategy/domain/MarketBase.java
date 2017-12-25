@@ -11,7 +11,6 @@ import java.util.Date;
 @Data
 @AllArgsConstructor
 public class MarketBase {
-
     // to calc pure long position price gap, see if our strategy is good or not.
     private Date beginDate;
     private Date endDate;

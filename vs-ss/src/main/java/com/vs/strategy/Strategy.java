@@ -1,7 +1,7 @@
 package com.vs.strategy;
 
-import com.vs.common.domain.Order;
-import com.vs.strategy.domain.TradeContext;
+import com.vs.common.domain.TradeAction;
+import com.vs.strategy.domain.MarketContext;
 
 import java.util.List;
 
@@ -11,5 +11,5 @@ import java.util.List;
  */
 public interface Strategy {
     String getName();
-    List<Order> analysis(final TradeContext info);
+    List<TradeAction> execute(final MarketContext context);
 }

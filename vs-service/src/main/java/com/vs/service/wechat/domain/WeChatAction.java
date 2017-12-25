@@ -2,7 +2,7 @@ package com.vs.service.wechat.domain;
 
 
 import com.vs.common.domain.Stock;
-import com.vs.common.domain.enums.MarketIndex;
+import com.vs.common.domain.enums.MarketIndexs;
 
 /**
  * Created by erix-mac on 2017/1/9.
@@ -29,7 +29,7 @@ public enum  WeChatAction {
                     action = WeChatAction.RECOMMEND;
                 }
             case 2:
-                if (MarketIndex.isIndexByAbbreviation(input) ){
+                if (MarketIndexs.isIndexByAbbreviation(input) ){
                     action = WeChatAction.ABB_INDEX;
                     action.code = input;
                 }
@@ -47,13 +47,13 @@ public enum  WeChatAction {
                 }
                 break;
             case 7:
-                if ( input.toUpperCase().endsWith("S") && MarketIndex.isIndex(input.substring(0, input.length()-1) ) ) {
+                if ( input.toUpperCase().endsWith("S") && MarketIndexs.isIndex(input.substring(0, input.length()-1) ) ) {
                     action = WeChatAction.INDEX;
                     action.code = input;
                 }
                 break;
             case 8:
-                if ( input.toUpperCase().startsWith("L:") && MarketIndex.isIndex(input.substring(0, input.length()-1) ) ) {
+                if ( input.toUpperCase().startsWith("L:") && MarketIndexs.isIndex(input.substring(0, input.length()-1) ) ) {
                     action = WeChatAction.INDEX;
                     action.code = input;
                 }

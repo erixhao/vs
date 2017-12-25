@@ -8,7 +8,7 @@ import com.vs.common.domain.vo.TimeWindow;
 import com.vs.common.utils.PerformanceUtils;
 import com.vs.common.utils.PropertieUtils;
 import com.vs.market.MarketDataService;
-import com.vs.strategy.StrategeService;
+import com.vs.strategy.StrategyService;
 import com.vs.strategy.domain.Dividends;
 import com.vs.strategy.gann.PyramidStrategy;
 import lombok.Getter;
@@ -37,7 +37,7 @@ public class TraderService {
 
     @Getter @Setter
     @Autowired
-    private StrategeService strategeService;
+    private StrategyService strategyService;
     @Autowired
     private MarketDataService marketService;
     @Autowired
@@ -48,7 +48,7 @@ public class TraderService {
 
     public List<TradingBook> autoTrade(TimeWindow time, double totalCapital, boolean mustWinStratege ) {
         if ( mustWinStratege ){
-            strategeService.setAndOption(mustWinStratege);
+            strategyService.setAndOption(mustWinStratege);
         }
         return this.autoTrade(time, time.getPeriod(), totalCapital);
     }
@@ -77,7 +77,7 @@ public class TraderService {
             for (Stock s : stocks) {
                 final TradeManager m = new TradeManager(s, timeWindow, period, totalCapital);
                 m.setMarketService(marketService);
-                m.setStrategeService(strategeService);
+                m.setStrategyService(strategyService);
                 m.setPyramidStrategy(pyramidStrategy);
                 m.setDividends(dividends);
 

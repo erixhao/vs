@@ -2,13 +2,13 @@ package com.vs.strategy.livermore;
 
 import com.google.common.collect.Lists;
 import com.vs.common.domain.Stock;
+import com.vs.common.domain.TradeAction;
 import com.vs.common.domain.TradingBook;
-import com.vs.common.domain.Order;
+import com.vs.common.domain.enums.Strategies;
 import com.vs.common.domain.enums.TradeDirection;
-import com.vs.common.domain.enums.TradeStrategy;
-import com.vs.strategy.domain.TradeContext;
-import com.vs.strategy.AbstractTradeStrategy;
+import com.vs.strategy.AbstractStrategy;
 import com.vs.strategy.Strategy;
+import com.vs.strategy.domain.MarketContext;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
@@ -20,23 +20,23 @@ import java.util.List;
  */
 @Slf4j
 @Component
-public class LMKeepProfit extends AbstractTradeStrategy implements Strategy {
+public class LMKeepProfit extends AbstractStrategy implements Strategy {
 
     private final static double PROFIT_100_DOUBLE = 100;
 
 
     @Override
     public String getName() {
-        return TradeStrategy.LivermoreKeepProfit.toString();
+        return Strategies.LivermoreKeepProfit.toString();
     }
 
     @Override
-    public List<Order> analysis(TradeContext info) {
-        List<Order> result = Lists.newArrayList();
+    public List<TradeAction> execute(MarketContext context) {
+        List<TradeAction> result = Lists.newArrayList();
 
-        Stock stock = info.getStock();
-        Date date = info.getAnalysisDate();
-        TradingBook tradingBook = info.getTradingBook();
+        Stock stock = context.getStock();
+        Date date = context.getAnalysisDate();
+        TradingBook tradingBook = context.getTradingBook();
 
         if (tradingBook.getPositions() == 0)
             return result;
@@ -46,13 +46,13 @@ public class LMKeepProfit extends AbstractTradeStrategy implements Strategy {
 
         if ( isDoubled ) {
 
-            Order action = new Order(TradeStrategy.LivermoreKeepProfit, TradeDirection.SELL, stock, date, date);
+            TradeAction action = new TradeAction(Strategies.LivermoreKeepProfit, TradeDirection.SELL, stock, date, date);
 
             action.setTradeDate(date);
-            action.setTradePrice(info.getMarketPrice());
+            action.setTradePrice(context.getMarketPrice());
             action.setNettingHandled(false);
 
-            long positions = (long)((tradingBook.getPnL().getProfit() / 2.0) / info.getMarketPrice());
+            long positions = (long)((tradingBook.getPnL().getProfit() / 2.0) / context.getMarketPrice());
             //action.setPositions(positions);
 
             System.out.println("#####$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$  Livermore Keep Profit : " + positions);

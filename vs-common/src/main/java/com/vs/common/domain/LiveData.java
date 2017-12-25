@@ -39,10 +39,6 @@ public class LiveData extends AbstractMarketData {
     private double sellPrice4;
     private double sellPrice5;
 
-/*    protected double high52weeks;
-    protected double low52weeks;*/
-
-
     @Override
     public double getPercentage(){
         if ( this.close == 0 )

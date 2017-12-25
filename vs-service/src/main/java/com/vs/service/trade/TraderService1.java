@@ -7,7 +7,7 @@ import com.vs.common.domain.enums.TimePeriod;
 import com.vs.common.domain.vo.TimeWindow;
 import com.vs.common.utils.PropertieUtils;
 import com.vs.market.MarketDataService;
-import com.vs.strategy.StrategeService;
+import com.vs.strategy.StrategyService;
 import com.vs.strategy.domain.Dividends;
 import com.vs.strategy.gann.PyramidStrategy;
 import lombok.Getter;
@@ -37,7 +37,7 @@ public class TraderService1 {
 
 
     @Autowired
-    private StrategeService strategeService;
+    private StrategyService strategyService;
     @Autowired
     private MarketDataService marketService;
     @Autowired
@@ -56,7 +56,7 @@ public class TraderService1 {
 
         TradeManager manager = new TradeManager(null, timeWindow, period, totalCapital);
         manager.setMarketService(marketService);
-        manager.setStrategeService(strategeService);
+        manager.setStrategyService(strategyService);
         manager.setPyramidStrategy(pyramidStrategy);
         manager.setDividends(dividends);
 

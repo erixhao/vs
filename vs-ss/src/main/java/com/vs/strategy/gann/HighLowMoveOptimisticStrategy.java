@@ -3,13 +3,13 @@ package com.vs.strategy.gann;
 
 import com.vs.common.domain.HistoricalData;
 import com.vs.common.domain.Stock;
-import com.vs.common.domain.Order;
+import com.vs.common.domain.TradeAction;
 import com.vs.common.domain.enums.BullBear;
+import com.vs.common.domain.enums.Strategies;
 import com.vs.common.domain.enums.TradeDirection;
-import com.vs.common.domain.enums.TradeStrategy;
 import com.vs.common.domain.enums.Trend;
-import com.vs.strategy.domain.TradeContext;
 import com.vs.common.utils.MarketDataUtils;
+import com.vs.strategy.domain.MarketContext;
 import org.springframework.stereotype.Component;
 
 import java.util.Date;
@@ -25,10 +25,10 @@ import static com.vs.strategy.gann.HighLowMoveStrategy.*;
 public final class HighLowMoveOptimisticStrategy {
 
 
-    public Order analysis(final TradeContext info, final List<HistoricalData> datas, HistoricalData next, double DELTA_INDEX_PERCENTAGE, double DELTA_PERCENTAGE, BullBear trend){
+    public TradeAction execute(final MarketContext context, final List<HistoricalData> datas, HistoricalData next, double DELTA_INDEX_PERCENTAGE, double DELTA_PERCENTAGE, BullBear trend){
 
-        Stock stock = info.getStock();
-        Date date = info.getAnalysisDate();
+        Stock stock = context.getStock();
+        Date date = context.getAnalysisDate();
 
         HistoricalData d0 = MarketDataUtils.getMarketCurrent(datas,date);
         HistoricalData p1 = MarketDataUtils.getMarketT(datas, date, -1);
@@ -39,7 +39,7 @@ public final class HighLowMoveOptimisticStrategy {
         if ( d0 == null )
             return null;
 
-        Order action = new Order(TradeStrategy.OptimisticHLMoveStrategy, TradeDirection.NONE,stock,date, date);
+        TradeAction action = new TradeAction(Strategies.OptimisticHLMoveStrategy, TradeDirection.NONE,stock,date, date);
 
         // use close/open
         double delta = calcDelta(p4.getLow(), d0.getClose());

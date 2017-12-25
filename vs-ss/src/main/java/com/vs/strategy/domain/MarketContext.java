@@ -15,8 +15,7 @@ import java.util.Date;
  */
 @AllArgsConstructor
 @Data
-public class TradeContext {
-
+public class MarketContext {
     private TradingBook tradingBook;
     private Date analysisDate;
     private TimeWindow timeWindow;

@@ -4,7 +4,8 @@ import com.google.common.collect.Lists;
 import com.vs.strategy.common.MarketTrendStrategy;
 import com.vs.strategy.common.StopLossStrategy;
 import com.vs.strategy.gann.*;
-import com.vs.strategy.indicators.*;
+import com.vs.strategy.indicators.MACDStrategy;
+import com.vs.strategy.indicators.MAStrategy;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,7 +21,7 @@ import java.util.List;
  */
 @Service
 @Scope("prototype")
-public class StrategeService {
+public class StrategyService {
 
     @Getter @Setter
     private boolean andOption = false;
@@ -30,7 +31,7 @@ public class StrategeService {
     @Autowired @Getter
     private StopLossStrategy stopLossStrategy;
     @Autowired @Getter
-    private KeepTradeProfitStrategy keepTradeProfitStrategy;
+    private KeepProfitStrategy keepTradeProfitStrategy;
     @Autowired @Getter
     private KeepTransactionProfitStrategy keepTransactionProfitStrategy;
     @Autowired @Getter

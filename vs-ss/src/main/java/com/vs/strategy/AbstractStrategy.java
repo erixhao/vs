@@ -2,14 +2,14 @@ package com.vs.strategy;
 
 
 import com.vs.common.domain.HistoricalData;
-import com.vs.common.domain.Order;
+import com.vs.common.domain.TradeAction;
 import com.vs.common.domain.enums.BullBear;
 import com.vs.common.domain.enums.TimePeriod;
 import com.vs.common.domain.enums.TradeDirection;
-import com.vs.strategy.domain.TradeContext;
 import com.vs.common.utils.MarketDataUtils;
 import com.vs.market.MarketDataService;
 import com.vs.strategy.common.MarketTrendAnalyze;
+import com.vs.strategy.domain.MarketContext;
 import com.vs.strategy.index.IndexTrendStrategy;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,7 +21,7 @@ import java.util.List;
  * Created by erix-mac on 15/8/22.
  */
 @Slf4j
-public abstract class AbstractTradeStrategy implements Strategy {
+public abstract class AbstractStrategy implements Strategy {
     @Autowired
     protected MarketDataService marketService;
 
@@ -34,7 +34,7 @@ public abstract class AbstractTradeStrategy implements Strategy {
 
 
     @Override
-    public abstract List<Order> analysis(TradeContext info);
+    public abstract List<TradeAction> execute(MarketContext context);
 
     protected BullBear analysisMarketTrend(String code, final Date date){
         return  marketTrendAnalyze.analysisTrend(code,date);
@@ -48,7 +48,7 @@ public abstract class AbstractTradeStrategy implements Strategy {
         return getMarketDataT(code, date, 0);
     }
 
-    protected HistoricalData getMarketDataT(TradeContext info){
+    protected HistoricalData getMarketDataT(MarketContext info){
         return getMarketDataT(info,0);
     }
 
@@ -56,7 +56,7 @@ public abstract class AbstractTradeStrategy implements Strategy {
         List<HistoricalData> datas = this.getMarketDataList(code);
         return MarketDataUtils.getMarketT(datas, date, T);    }
 
-    protected HistoricalData getMarketDataT(TradeContext info, int T){
+    protected HistoricalData getMarketDataT(MarketContext info, int T){
         return getMarketDataT(info.getStock().getCode(), info.getAnalysisDate(), T);
     }
 
@@ -64,7 +64,7 @@ public abstract class AbstractTradeStrategy implements Strategy {
         return this.marketService.getMarketHistoricalData(code, TimePeriod.DAILY);
     }
 
-    protected HistoricalData getNextHistoricalDate(TradeContext info){
+    protected HistoricalData getNextHistoricalDate(MarketContext info){
         List<HistoricalData> datas = this.getMarketDataList(info.getStock().getCode());
         HistoricalData d0 = MarketDataUtils.getMarketCurrent(datas,info.getAnalysisDate());
         HistoricalData d1 = MarketDataUtils.getMarketT(datas, info.getAnalysisDate(), 1);
@@ -84,7 +84,7 @@ public abstract class AbstractTradeStrategy implements Strategy {
         }
     }
 
-    protected List<Order> addTradeAction(List<Order> result, Order action, HistoricalData next, Date date){
+    protected List<TradeAction> addTradeAction(List<TradeAction> result, TradeAction action, HistoricalData next, Date date){
         if ( action.getTradeDirection().equals(TradeDirection.SELL) || action.getTradeDirection().equals(TradeDirection.BUY) ){
             Date nextTradeDate = next.getDate() == null ? MarketDataUtils.getNextTradeDate(date) : next.getDate();
             action.setTradeDate(nextTradeDate);

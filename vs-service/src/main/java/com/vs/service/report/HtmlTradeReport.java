@@ -2,9 +2,9 @@ package com.vs.service.report;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.vs.common.domain.PnL;
 import com.vs.common.domain.Stock;
 import com.vs.common.domain.TradingBook;
-import com.vs.common.domain.PnL;
 import com.vs.common.domain.Transaction;
 import com.vs.common.utils.DataFormatUtil;
 
@@ -83,7 +83,7 @@ public class HtmlTradeReport {
                 int i = 0;
                 for (Transaction transaction : tradingBook.getTransactions()) {
                     i++;
-                    PnL p = transaction.getCurrentTadeProfit();
+                    PnL p = transaction.getCurrentTradePnL();
                     //trade.makeTransaction(transaction);
                     sb.append("<TR class=\"tableDetail\">");
 

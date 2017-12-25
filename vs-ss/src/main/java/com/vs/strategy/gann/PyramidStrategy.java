@@ -1,10 +1,10 @@
 package com.vs.strategy.gann;
 
 
-import com.vs.common.domain.vo.PyramidPosition;
+import com.vs.common.domain.TradeAction;
 import com.vs.common.domain.TradingBook;
-import com.vs.common.domain.Order;
 import com.vs.common.domain.enums.TradeDirection;
+import com.vs.common.domain.vo.PyramidPosition;
 import com.vs.strategy.PositionStrategy;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -26,7 +26,7 @@ public class PyramidStrategy implements PositionStrategy {
     }
 
     @Override
-    public PyramidPosition analysis(TradingBook tradingBook, Order action) {
+    public PyramidPosition execute(TradingBook tradingBook, TradeAction action) {
 
         PyramidPosition pyramid = (PyramidPosition)((PyramidPosition)tradingBook.getMarkToMarket().getPyramidPosition()).clone();
         int nextIndex = this.nextIndex(action.getTradeDirection(), pyramid);

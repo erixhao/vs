@@ -2,7 +2,7 @@ package com.vs.strategy.index;
 
 import com.google.common.collect.Maps;
 import com.vs.common.domain.enums.BullBear;
-import com.vs.common.domain.enums.MarketIndex;
+import com.vs.common.domain.enums.MarketIndexs;
 import com.vs.common.domain.enums.TimePeriod;
 import com.vs.common.domain.vo.TimeWindow;
 import com.vs.common.utils.BeanContext;
@@ -30,24 +30,24 @@ public class IndexTrendStrategy {
 
 
     public BullBear analysisTrend(final Date date){
-        return marketTrendAnalyze.analysisTrend(MarketIndex.ShanghaiCompositeIndex.getSinaCode(),date);
+        return marketTrendAnalyze.analysisTrend(MarketIndexs.ShanghaiCompositeIndex.getSinaCode(),date);
     }
 
     public BullBear analysisTimeWindowTrend(final Date date, TimeWindow window){
-        return marketTrendAnalyze.analysisTimeWindowTrend(MarketIndex.ShanghaiCompositeIndex.getSinaCode(),date, window);
+        return marketTrendAnalyze.analysisTimeWindowTrend(MarketIndexs.ShanghaiCompositeIndex.getSinaCode(),date, window);
     }
 
-    public Map<MarketIndex,BullBear> analysisAllIndex(final Date date){
+    public Map<MarketIndexs,BullBear> analysisAllIndex(final Date date){
 
-        Map<MarketIndex,BullBear> map = Maps.newConcurrentMap();
+        Map<MarketIndexs,BullBear> map = Maps.newConcurrentMap();
 
-        BullBear shIndex = marketTrendAnalyze.analysisTrend(MarketIndex.ShanghaiCompositeIndex.getSinaCode(),date);
-        BullBear szIndex = marketTrendAnalyze.analysisTrend(MarketIndex.ShenzhenComponentIndex.getSinaCode(),date);
-        BullBear geIndex = marketTrendAnalyze.analysisTrend(MarketIndex.GrowthEnterpriseIndex.getSinaCode(),date);
+        BullBear shIndex = marketTrendAnalyze.analysisTrend(MarketIndexs.ShanghaiCompositeIndex.getSinaCode(),date);
+        BullBear szIndex = marketTrendAnalyze.analysisTrend(MarketIndexs.ShenzhenComponentIndex.getSinaCode(),date);
+        BullBear geIndex = marketTrendAnalyze.analysisTrend(MarketIndexs.GrowthEnterpriseIndex.getSinaCode(),date);
 
-        map.put(MarketIndex.ShanghaiCompositeIndex,shIndex);
-        map.put(MarketIndex.ShenzhenComponentIndex,szIndex);
-        map.put(MarketIndex.GrowthEnterpriseIndex,geIndex);
+        map.put(MarketIndexs.ShanghaiCompositeIndex,shIndex);
+        map.put(MarketIndexs.ShenzhenComponentIndex,szIndex);
+        map.put(MarketIndexs.GrowthEnterpriseIndex,geIndex);
 
         return map;
     }
@@ -68,7 +68,7 @@ public class IndexTrendStrategy {
         //strategy.getMarketTrendAnalyze().marketTrendRegression(StockIndex.ShenzhenComponentIndex.getSinaCode(), beginDate, endDate, TimePeriod.WEEKLY);
         //strategy.getMarketTrendAnalyze().marketTrendRegression(StockIndex.ShanghaiShenzhen300Index.getSinaCode(), beginDate, endDate, TimePeriod.WEEKLY);
         //strategy.getMarketTrendAnalyze().marketTrendRegression(StockIndex.GrowthEnterpriseIndex.getSinaCode(), beginDate, endDate, TimePeriod.DAILY);
-        strategy.getMarketTrendAnalyze().marketTrendRegression(MarketIndex.Shanghai50Index.getSinaCode(), beginDate, endDate, TimePeriod.DAILY);
+        strategy.getMarketTrendAnalyze().marketTrendRegression(MarketIndexs.Shanghai50Index.getSinaCode(), beginDate, endDate, TimePeriod.DAILY);
 
 
     }

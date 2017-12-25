@@ -35,7 +35,7 @@ public enum MarketProvider {
         if ( isConvertMarketProviderCode(stock) )
             return stock;
 
-        Market market = Market.getMarket(stock);
+        Market market = Market.toMarket(stock);
 
         return (market.equals(Market.Shanghai) ? MARKET_CODE_SINA_SH + stock : MARKET_CODE_SINA_SZ + stock);
     }
@@ -55,7 +55,7 @@ public enum MarketProvider {
         if ( isConvertMarketProviderCode(stock) )
             return stock;
 
-        Market market = Market.getMarket(stock);
+        Market market = Market.toMarket(stock);
 
         return (market.equals(Market.Shanghai) ? stock + MARKET_CODE_YAHOO_SH : stock + MARKET_CODE_YAHOO_SZ);
     }

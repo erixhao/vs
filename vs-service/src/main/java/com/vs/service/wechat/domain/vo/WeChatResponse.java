@@ -2,11 +2,11 @@ package com.vs.service.wechat.domain.vo;
 
 import com.google.common.collect.Lists;
 import com.vs.common.domain.HistoricalData;
-import com.vs.common.domain.TradingBook;
 import com.vs.common.domain.PnL;
+import com.vs.common.domain.TradingBook;
 import com.vs.common.domain.Transaction;
 import com.vs.common.domain.enums.BullBear;
-import com.vs.common.domain.enums.MarketIndex;
+import com.vs.common.domain.enums.MarketIndexs;
 import com.vs.common.domain.enums.TimePeriod;
 import com.vs.common.domain.enums.TradeDirection;
 import com.vs.common.domain.vo.TimeWindow;
@@ -32,7 +32,7 @@ public class WeChatResponse {
     private final static int LATEST_TRADE_DAY = -30 * 3;
 
 
-    public TradeResult toResponse(String code, List<Transaction> trans, List<TradingBook> tradingBooks, BullBear trend, Map<MarketIndex, BullBear> index,
+    public TradeResult toResponse(String code, List<Transaction> trans, List<TradingBook> tradingBooks, BullBear trend, Map<MarketIndexs, BullBear> index,
                                   Map<String, TradeResult> random, Map<String, TradeResult> randomProfit) {
         StringBuilder sb = new StringBuilder();
 
@@ -130,15 +130,15 @@ public class WeChatResponse {
                 .toString();
     }
 
-    private static String generateSummary(String code, BullBear trend, Map<MarketIndex, BullBear> index) {
+    private static String generateSummary(String code, BullBear trend, Map<MarketIndexs, BullBear> index) {
         String SUMMARY = "根据Venus分析，目前大盘(上证)处于%2s,深圳指数处于%2s,创业指数处于%2s,个股[%6s]处于%2s,建议操作较为%2s, 请参考如下提示：";
 
-        String action = (MarketIndex.isIndexBull(index) || trend.isBull()) ? "乐观" : "谨慎";
+        String action = (MarketIndexs.isIndexBull(index) || trend.isBull()) ? "乐观" : "谨慎";
         StringBuilder sb = new StringBuilder();
-        sb.append(String.format(SUMMARY, index.get(MarketIndex.ShanghaiCompositeIndex).getChiness(),
-                index.get(MarketIndex.ShenzhenComponentIndex).getChiness(),
-                index.get(MarketIndex.GrowthEnterpriseIndex).getChiness(),
-                code, trend.getChiness(), action));
+        sb.append(String.format(SUMMARY, index.get(MarketIndexs.ShanghaiCompositeIndex).getChinese(),
+                index.get(MarketIndexs.ShenzhenComponentIndex).getChinese(),
+                index.get(MarketIndexs.GrowthEnterpriseIndex).getChinese(),
+                code, trend.getChinese(), action));
 
         return sb.toString();
     }
@@ -200,7 +200,7 @@ public class WeChatResponse {
             if (t.getPositions() <= 0)
                 continue;
             sb.append("\n");
-            sb.append(String.format(DETAIL_STR, HistoricalData.toMarketShortDate(t.getDate()), t.getDirection().getDesc(), format1.format(t.getPrice()), format.format(t.getCurrentTadeProfit().getCurrProfitPercentage()) + "%", format.format(t.getCurrentTadeProfit().getTotalProfitPercentage()) + "%"));
+            sb.append(String.format(DETAIL_STR, HistoricalData.toMarketShortDate(t.getDate()), t.getDirection().getDesc(), format1.format(t.getPrice()), format.format(t.getCurrentTradePnL().getCurrProfitPercentage()) + "%", format.format(t.getCurrentTradePnL().getTotalProfitPercentage()) + "%"));
         }
         sb.append("\n").append(LINE);
 

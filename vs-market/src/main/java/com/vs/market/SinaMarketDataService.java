@@ -4,8 +4,8 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.vs.common.domain.HistoricalData;
 import com.vs.common.domain.LiveData;
+import com.vs.common.domain.enums.MarketIndexs;
 import com.vs.common.domain.enums.MarketProvider;
-import com.vs.common.domain.enums.MarketIndex;
 import com.vs.common.domain.enums.TimePeriod;
 import com.vs.common.utils.DateUtils;
 import com.vs.common.utils.HtmlUtils;
@@ -48,21 +48,21 @@ public class SinaMarketDataService {
 
 
     public Map<String, LiveData> getAllMarketIndexs() {
-        return getMarketLiveData(MarketIndex.values());
+        return getMarketLiveData(MarketIndexs.values());
     }
 
-    public LiveData getMarketData(MarketIndex index) {
-        return getMarketLiveData(new MarketIndex[]{index}).get(0);
+    public LiveData getMarketData(MarketIndexs index) {
+        return getMarketLiveData(new MarketIndexs[]{index}).get(0);
     }
 
 
-    public Map<String, LiveData> getMarketLiveData(MarketIndex[] indexs) {
+    public Map<String, LiveData> getMarketLiveData(MarketIndexs[] indexs) {
 
         if (indexs == null || indexs.length == 0)
             return null;
 
         StringBuilder sb = new StringBuilder();
-        for (MarketIndex index : indexs) {
+        for (MarketIndexs index : indexs) {
             sb.append(index.getCode(MarketProvider.SINA)).append(SINA_SPLIT);
         }
 
@@ -310,7 +310,7 @@ public class SinaMarketDataService {
         return sb.toString();
     }
 
-    public String extractURL(MarketIndex index) {
+    public String extractURL(MarketIndexs index) {
         return SINA_FINANCE_URL_TODAY + index.getCode(MarketProvider.SINA);
     }
 

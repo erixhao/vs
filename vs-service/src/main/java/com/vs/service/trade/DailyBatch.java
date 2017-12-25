@@ -1,11 +1,10 @@
 package com.vs.service.trade;
 
 import com.google.common.collect.Lists;
-import com.vs.common.domain.enums.BullBear;
-import com.vs.strategy.domain.MarketBase;
-import com.vs.common.domain.TradingBook;
 import com.vs.common.domain.PnL;
+import com.vs.common.domain.TradingBook;
 import com.vs.common.domain.Transaction;
+import com.vs.common.domain.enums.BullBear;
 import com.vs.common.domain.enums.TimePeriod;
 import com.vs.common.domain.vo.TimeWindow;
 import com.vs.common.utils.BeanContext;
@@ -15,6 +14,7 @@ import com.vs.common.utils.PropertieUtils;
 import com.vs.market.MarketService;
 import com.vs.strategy.analysis.MarketMovementAnalyze;
 import com.vs.strategy.common.MarketTrendAnalyze;
+import com.vs.strategy.domain.MarketBase;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -121,8 +121,8 @@ public class DailyBatch {
             BullBear trend = this.marketTrendAnalyze.analysisTrend(t.getStock().getCode(), t.getDate());
 
             System.out.println(String.format(DETAIL_STR, toMarketDate(t.getDate()), t.getStock().getCode(), t.getDirection(), format.format(t.getPrice()),
-                    t.getPositions(),format.format(t.getCurrentTadeProfit().getCurrProfitPercentage()) + "%",
-                    format.format(t.getCurrentTadeProfit().getTotalProfitPercentage()) + "%",
+                    t.getPositions(),format.format(t.getCurrentTradePnL().getCurrProfitPercentage()) + "%",
+                    format.format(t.getCurrentTradePnL().getTotalProfitPercentage()) + "%",
                     trend.toString()
             ));
         }

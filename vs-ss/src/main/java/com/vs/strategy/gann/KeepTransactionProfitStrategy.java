@@ -2,15 +2,13 @@ package com.vs.strategy.gann;
 
 import com.google.common.collect.Lists;
 import com.vs.common.domain.*;
+import com.vs.common.domain.enums.Strategies;
 import com.vs.common.domain.enums.TimePeriod;
 import com.vs.common.domain.enums.TradeDirection;
-import com.vs.common.domain.enums.TradeStrategy;
-import com.vs.common.domain.HistoricalData;
-import com.vs.common.domain.Order;
-import com.vs.strategy.domain.TradeContext;
 import com.vs.common.utils.MarketDataUtils;
-import com.vs.strategy.AbstractTradeStrategy;
+import com.vs.strategy.AbstractStrategy;
 import com.vs.strategy.Strategy;
+import com.vs.strategy.domain.MarketContext;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
@@ -23,7 +21,7 @@ import java.util.List;
  */
 @Slf4j
 @Component
-public class KeepTransactionProfitStrategy extends AbstractTradeStrategy implements Strategy {
+public class KeepTransactionProfitStrategy extends AbstractStrategy implements Strategy {
 
     final static double MAX_PROFIT_RAIO = 8;
     final static double MAX_KEEP_PROFIT_RAIO = 4;
@@ -33,16 +31,16 @@ public class KeepTransactionProfitStrategy extends AbstractTradeStrategy impleme
 
     @Override
     public String getName() {
-        return TradeStrategy.KeepTransactionProfitStrategy.toString();
+        return Strategies.KeepTransactionProfitStrategy.toString();
     }
 
     @Override
-    public List<Order> analysis(TradeContext info){
-        List<Order> result = Lists.newArrayList();
+    public List<TradeAction> execute(MarketContext context){
+        List<TradeAction> result = Lists.newArrayList();
 
-        Stock stock = info.getStock();
-        Date date = info.getAnalysisDate();
-        TradingBook tradingBook = info.getTradingBook();
+        Stock stock = context.getStock();
+        Date date = context.getAnalysisDate();
+        TradingBook tradingBook = context.getTradingBook();
 
         if ( tradingBook.getPositions() == 0 )
             return result;
@@ -59,10 +57,10 @@ public class KeepTransactionProfitStrategy extends AbstractTradeStrategy impleme
 
             if ( triggerKeepProfit(stock, date, trans) ) {
                 //log.info("++++++++  triggerKeepProfit : " + trans.toString());
-                Order action = new Order(TradeStrategy.KeepTransactionProfitStrategy,TradeDirection.SELL,stock,date,date);
+                TradeAction action = new TradeAction(Strategies.KeepTransactionProfitStrategy,TradeDirection.SELL,stock,date,date);
 
                 action.setTradeDate(date);
-                action.setTradePrice(info.getMarketPrice());
+                action.setTradePrice(context.getMarketPrice());
                 action.setNettingHandled(true);
                 trans.setClosed(true);
                 trans.setCloseAction(action);

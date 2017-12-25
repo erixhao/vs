@@ -3,8 +3,8 @@ package com.vs.market;
 
 import com.vs.common.domain.AbstractMarketData;
 import com.vs.common.domain.HistoricalData;
+import com.vs.common.domain.enums.MarketIndexs;
 import com.vs.common.domain.enums.MarketProvider;
-import com.vs.common.domain.enums.MarketIndex;
 import com.vs.common.domain.enums.TimePeriod;
 import lombok.Cleanup;
 import lombok.SneakyThrows;
@@ -34,7 +34,7 @@ public class YahooMarketDataService {
 
 
 
-    public List<HistoricalData> getMarketData(MarketIndex index, TimePeriod period, int historyDays ){
+    public List<HistoricalData> getMarketData(MarketIndexs index, TimePeriod period, int historyDays ){
         return getMarketData(index.getCode(MarketProvider.YAHOO), period, historyDays);
     }
 
