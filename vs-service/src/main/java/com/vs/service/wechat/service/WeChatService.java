@@ -5,7 +5,7 @@ import com.vs.common.domain.Stock;
 import com.vs.common.domain.TradingBook;
 import com.vs.common.domain.Transaction;
 import com.vs.common.domain.enums.BullBear;
-import com.vs.common.domain.enums.MarketIndex;
+import com.vs.common.domain.enums.MarketIndexs;
 import com.vs.common.domain.enums.TimePeriod;
 import com.vs.common.domain.vo.TimeWindow;
 import com.vs.common.utils.BeanContext;
@@ -73,10 +73,10 @@ public class WeChatService {
                 result = this.processStockAction(action);
                 break;
             case ABB_INDEX:
-                result = this.processStockAction(MarketIndex.parseByAbbreviation(action).getSinaCode());
+                result = this.processStockAction(MarketIndexs.parseByAbbreviation(action).getSinaCode());
                 break;
             case TREND_INDEX:
-                result = this.processTrendAction(MarketIndex.parseByAbbreviation(weChatAction.getCode()).getSinaCode());
+                result = this.processTrendAction(MarketIndexs.parseByAbbreviation(weChatAction.getCode()).getSinaCode());
                 break;
             case TREND_STOCK:
                 result = this.processTrendAction(weChatAction.getCode());
@@ -120,7 +120,7 @@ public class WeChatService {
         long p3 = PerformanceUtils.endTime("autoTrade", p2);
 
         BullBear trend = this.marketTrendAnalyze.analysisTrend(code, new Date());
-        Map<MarketIndex, BullBear> idxTrend = this.indexTrendStrategy.analysisAllIndex(new Date());
+        Map<MarketIndexs, BullBear> idxTrend = this.indexTrendStrategy.analysisAllIndex(new Date());
         Map<String, TradeResult> randomTrade = this.tradeCacheService.randomTradeCache(3, CacheSignal.TRADE);
         Map<String, TradeResult> randomProfit = this.tradeCacheService.randomTradeCache(5, CacheSignal.GREAT_PROFIT);
 

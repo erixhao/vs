@@ -4,14 +4,15 @@ import com.google.common.collect.Lists;
 import com.vs.common.domain.*;
 import com.vs.common.domain.enums.TimePeriod;
 import com.vs.common.domain.enums.TradeDirection;
-import com.vs.common.domain.vo.*;
+import com.vs.common.domain.vo.PyramidPosition;
+import com.vs.common.domain.vo.TimeWindow;
 import com.vs.common.utils.DateUtils;
 import com.vs.common.utils.MarketDataUtils;
 import com.vs.market.MarketDataService;
-import com.vs.strategy.StrategeService;
 import com.vs.strategy.Strategy;
+import com.vs.strategy.StrategyService;
 import com.vs.strategy.domain.Dividends;
-import com.vs.strategy.domain.TradeContext;
+import com.vs.strategy.domain.MarketContext;
 import com.vs.strategy.gann.PyramidStrategy;
 import lombok.Data;
 import lombok.Setter;
@@ -37,7 +38,7 @@ public class TradeManager {
     private double totalCapital;
 
     @Setter
-    private StrategeService strategeService;
+    private StrategyService strategyService;
     @Setter
     private MarketDataService marketService;
     @Setter
@@ -79,7 +80,7 @@ public class TradeManager {
                 log.info("++++++++++++ After Split Date, Adjust Dividends Split : " + stock.getCode() + " : " + HistoricalData.toMarketDate(marketDate) + " Positions: " + tradingBook.getPositions());
             }
 
-            List<Order> actions = this.executeStrategy(STRATEGY_EXE_SERVICE, marketDate, tradingBook, timeWindow, market);
+            List<TradeAction> actions = this.executeStrategy(STRATEGY_EXE_SERVICE, marketDate, tradingBook, timeWindow, market);
             if ( actions.size() > 0 ){
                 this.executeTradeAction(tradingBook, actions);
             }
@@ -97,6 +98,7 @@ public class TradeManager {
             double endMarket = getTradeEndMarket(stock.getCode(), end);
             if ( endMarket > 0 ){
                 tradingBook.getMarkToMarket().setMarketPrice(endMarket);
+                tradingBook.getMarkToMarket().setMarketDate(end);
             }
         }
     }
@@ -115,33 +117,33 @@ public class TradeManager {
     }
 
 
-    private List<Order> executeStrategy(final ExecutorService executorService, Date date, TradingBook tradingBook, TimeWindow timeWindow, HistoricalData market) {
-        List<Order> orders = Lists.newArrayList();
+    private List<TradeAction> executeStrategy(final ExecutorService executorService, Date date, TradingBook tradingBook, TimeWindow timeWindow, HistoricalData market) {
+        List<TradeAction> tradeActions = Lists.newArrayList();
 
         if ( market == null )
-            return orders;
+            return tradeActions;
 
-        List<? extends Strategy> strategies = this.strategeService.getTradingStrategys();
+        List<? extends Strategy> strategies = this.strategyService.getTradingStrategys();
         tradingBook.getMarkToMarket().setMarketPrice(market.getClose());
 
-        final List<Future<List<Order>>> futureList = Lists.newArrayList();
+        final List<Future<List<TradeAction>>> futureList = Lists.newArrayList();
         final CountDownLatch countDownLatch = new CountDownLatch(strategies.size());
-        final TradeContext info = new TradeContext(tradingBook,date, timeWindow, market.getPeriod(), market.getClose());
+        final MarketContext info = new MarketContext(tradingBook,date, timeWindow, market.getPeriod(), market.getClose());
         try {
             for (Strategy s : strategies) {
                 final StrategyTaskThread task = new StrategyTaskThread(s, info);
                 task.setCountDownLatch(countDownLatch);
 
-                Future<List<Order>> futureAction = executorService.submit(task);
+                Future<List<TradeAction>> futureAction = executorService.submit(task);
                 futureList.add(futureAction);
             }
 
             countDownLatch.await();
 
-            for (Future<List<Order>> t : futureList) {
-                List<Order> actions = t.get();
+            for (Future<List<TradeAction>> t : futureList) {
+                List<TradeAction> actions = t.get();
                 if (actions != null && actions.size() > 0) {
-                    orders.addAll(actions);
+                    tradeActions.addAll(actions);
                 }
             }
         } catch (Throwable  e) {
@@ -153,33 +155,33 @@ public class TradeManager {
         }
 
 
-        return Order.merge(orders, this.strategeService.isAndOption());
+        return TradeAction.merge(tradeActions, this.strategyService.isAndOption());
     }
 
-    private List<Order> executeStrategy2(Date date, TradingBook tradingBook, TimeWindow timeWindow, HistoricalData market) {
-        List<Order> orders = Lists.newArrayList();
+    private List<TradeAction> executeStrategy2(Date date, TradingBook tradingBook, TimeWindow timeWindow, HistoricalData market) {
+        List<TradeAction> tradeActions = Lists.newArrayList();
 
         if ( market == null )
-            return orders;
+            return tradeActions;
 
-        List<? extends Strategy> strategies = this.strategeService.getTradingStrategys();
+        List<? extends Strategy> strategies = this.strategyService.getTradingStrategys();
         tradingBook.getMarkToMarket().setMarketPrice(market.getClose());
         for (Strategy s : strategies) {
-            List<Order> actions = s.analysis(new TradeContext(tradingBook,date, timeWindow, market.getPeriod(), market.getClose()));
+            List<TradeAction> actions = s.execute(new MarketContext(tradingBook,date, timeWindow, market.getPeriod(), market.getClose()));
             if ( actions  != null && actions.size() > 0 ) {
-                orders.addAll(actions);
+                tradeActions.addAll(actions);
             }
         }
 
-        return Order.merge(orders);
+        return TradeAction.merge(tradeActions);
     }
 
 
-    private boolean executeTradeAction(TradingBook tradingBook, List<Order> actions){
+    private boolean executeTradeAction(TradingBook tradingBook, List<TradeAction> actions){
 
-        for ( Order action : actions ) {
+        for ( TradeAction action : actions ) {
 
-            PyramidPosition p = this.pyramidStrategy.analysis(tradingBook, action);
+            PyramidPosition p = this.pyramidStrategy.execute(tradingBook, action);
             if ( p.getPositions() <= 0 && action.getTradeDirection().equals(TradeDirection.SELL) ) {
                 action.setTradeDirection(TradeDirection.SHORT);
             }

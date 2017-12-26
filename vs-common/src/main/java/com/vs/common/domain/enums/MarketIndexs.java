@@ -8,7 +8,7 @@ import java.util.Map;
 /**
  * Created by erix-mac on 15/8/3.
  */
-public enum MarketIndex {
+public enum MarketIndexs {
     ShanghaiCompositeIndex("Shanghai Index","000001", Market.Shanghai,"SH"), ShenzhenComponentIndex("ShenzhenComponentIndex","399001",Market.Shenzhen,"SZ"),
     GrowthEnterpriseIndex("GrowthEnterpriseIndex","399006",Market.Shenzhen,"GR"), ShanghaiShenzhen300Index("ShanghaiShenzhen 300 Index","000300",Market.Shanghai,"HS300"),
     Shanghai50Index("Shanghai50 Index","000016", Market.Shanghai,"SH50");
@@ -21,7 +21,7 @@ public enum MarketIndex {
     private Market market;
     private String abbreviation;
 
-    private MarketIndex(String name, String code, Market market, String abbreviation){
+    private MarketIndexs(String name, String code, Market market, String abbreviation){
         this.name = name;
         this.code = code;
         this.market = market;
@@ -54,7 +54,7 @@ public enum MarketIndex {
         return INDEXS_ABB.contains(abb.toUpperCase());
     }
 
-    public static MarketIndex parseByAbbreviation(String abb){
+    public static MarketIndexs parseByAbbreviation(String abb){
         switch ( abb ){
             case "SH":
                 return ShanghaiCompositeIndex;
@@ -72,7 +72,7 @@ public enum MarketIndex {
     }
 
 
-    public static boolean isIndexBull(Map<MarketIndex,BullBear> index){
+    public static boolean isIndexBull(Map<MarketIndexs,BullBear> index){
         int idx1 =  index.get(ShanghaiCompositeIndex).isBull() ? 1 : 0;
         int idx2 =  index.get(ShenzhenComponentIndex).isBull() ? 1 : 0;
         int idx3 =  index.get(GrowthEnterpriseIndex).isBull() ? 1 : 0;

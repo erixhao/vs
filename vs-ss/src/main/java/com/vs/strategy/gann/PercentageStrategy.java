@@ -2,21 +2,18 @@ package com.vs.strategy.gann;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.vs.common.domain.*;
+import com.vs.common.domain.HistoricalData;
+import com.vs.common.domain.Stock;
+import com.vs.common.domain.TradeAction;
+import com.vs.common.domain.TradingBook;
+import com.vs.common.domain.enums.Strategies;
 import com.vs.common.domain.enums.TimePeriod;
 import com.vs.common.domain.enums.TradeDirection;
-import com.vs.common.domain.enums.TradeStrategy;
-import com.vs.common.domain.HistoricalData;
 import com.vs.common.domain.vo.TimeWindow;
-import com.vs.common.domain.Order;
-import com.vs.strategy.domain.TradeContext;
-import com.vs.strategy.AbstractTradeStrategy;
+import com.vs.strategy.AbstractStrategy;
 import com.vs.strategy.Strategy;
 import com.vs.strategy.analysis.ExtremeAnalyze;
-import com.vs.strategy.domain.Dividends;
-import com.vs.strategy.domain.MarketPeak;
-import com.vs.strategy.domain.Peak;
-import com.vs.strategy.domain.PeakStrategy;
+import com.vs.strategy.domain.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -30,7 +27,7 @@ import java.util.Map;
  */
 @Slf4j
 @Component
-public class PercentageStrategy extends AbstractTradeStrategy implements Strategy {
+public class PercentageStrategy extends AbstractStrategy implements Strategy {
 
     private final static double DOWN_HALF = -0.618;
     private final static int TIME_WINDOW = -1;
@@ -61,7 +58,7 @@ public class PercentageStrategy extends AbstractTradeStrategy implements Strateg
 
     @Override
     public String getName() {
-        return TradeStrategy.PercentageStrategy.toString();
+        return Strategies.PercentageStrategy.toString();
     }
 
     public Strategy init(Stock stock, TimeWindow window, Date date){
@@ -76,13 +73,13 @@ public class PercentageStrategy extends AbstractTradeStrategy implements Strateg
     }
 
     @Override
-    public List<Order> analysis(TradeContext info){
-        List<Order> result = Lists.newArrayList();
+    public List<TradeAction> execute(MarketContext context){
+        List<TradeAction> result = Lists.newArrayList();
 
-        Stock stock = info.getStock();
-        Date date = info.getAnalysisDate();
-        TradingBook tradingBook = info.getTradingBook();
-        TimeWindow window = info.getTimeWindow();
+        Stock stock = context.getStock();
+        Date date = context.getAnalysisDate();
+        TradingBook tradingBook = context.getTradingBook();
+        TimeWindow window = context.getTimeWindow();
 
         HistoricalData market = this.getCurrentMarket(stock.getCode(),date);
         List<Double> top = PeakStrategy.toPeaks(getPeaks(stock.getCode(), window));
@@ -97,10 +94,10 @@ public class PercentageStrategy extends AbstractTradeStrategy implements Strateg
             //System.out.println(">>>>>>> After Split : " + top.toString());
         }
 
-        double marketPrice = info.getMarketPrice();
+        double marketPrice = context.getMarketPrice();
         updateLatestTop(stock,window,marketPrice);
 
-        Order action = new Order(TradeStrategy.PercentageStrategy, TradeDirection.NONE, stock, today, today, marketPrice);
+        TradeAction action = new TradeAction(Strategies.PercentageStrategy, TradeDirection.NONE, stock, today, today, marketPrice);
         if ( isTriggerPercentageTrade(stock, window, action, marketPrice)) {
             //System.out.println("----------------------------------------->>>>> PercentageStrategy :  Action" + action.toString());
             result.add(action);
@@ -128,7 +125,7 @@ public class PercentageStrategy extends AbstractTradeStrategy implements Strateg
         }
     }
 
-    private boolean isTriggerPercentageTrade(Stock stock, TimeWindow window, Order action, double market) {
+    private boolean isTriggerPercentageTrade(Stock stock, TimeWindow window, TradeAction action, double market) {
 
         boolean isTrigger = false;
 

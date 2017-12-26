@@ -4,18 +4,18 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.vs.common.domain.HistoricalData;
 import com.vs.common.domain.Stock;
+import com.vs.common.domain.TradeAction;
 import com.vs.common.domain.TradingBook;
-import com.vs.common.domain.Order;
+import com.vs.common.domain.enums.Strategies;
 import com.vs.common.domain.enums.TimePeriod;
 import com.vs.common.domain.enums.TradeDirection;
-import com.vs.common.domain.enums.TradeStrategy;
 import com.vs.common.domain.enums.Trend;
 import com.vs.common.domain.vo.TimeWindow;
-import com.vs.strategy.domain.TradeContext;
 import com.vs.common.utils.DateUtils;
-import com.vs.strategy.AbstractTradeStrategy;
+import com.vs.strategy.AbstractStrategy;
 import com.vs.strategy.Strategy;
 import com.vs.strategy.analysis.ExtremeAnalyze;
+import com.vs.strategy.domain.MarketContext;
 import com.vs.strategy.domain.MarketPeak;
 import com.vs.strategy.domain.Peak;
 import lombok.AllArgsConstructor;
@@ -34,7 +34,7 @@ import java.util.Map;
  */
 @Slf4j
 @Component
-public class TopBottomStrategy extends AbstractTradeStrategy implements Strategy {
+public class TopBottomStrategy extends AbstractStrategy implements Strategy {
 
     private final static int TIME_WINDOW = -7;
 
@@ -111,25 +111,25 @@ public class TopBottomStrategy extends AbstractTradeStrategy implements Strategy
 
     @Override
     public String getName() {
-        return TradeStrategy.TopBottomStrategy.toString();
+        return Strategies.TopBottomStrategy.toString();
     }
 
     @Override
-    public List<Order> analysis(TradeContext info){
-        List<Order> result = Lists.newArrayList();
+    public List<TradeAction> execute(MarketContext context){
+        List<TradeAction> result = Lists.newArrayList();
 
-        Stock stock = info.getStock();
-        Date date = info.getAnalysisDate();
-        TradingBook tradingBook = info.getTradingBook();
-        TimeWindow window = info.getTimeWindow();
+        Stock stock = context.getStock();
+        Date date = context.getAnalysisDate();
+        TradingBook tradingBook = context.getTradingBook();
+        TimeWindow window = context.getTimeWindow();
 
-        HistoricalData market = this.getMarketDataT(info);
+        HistoricalData market = this.getMarketDataT(context);
         Date today = date;
 
         this.initPeaksMap(stock, window, date);
 
-        double marketPrice = info.getMarketPrice();
-        Order action = new Order(TradeStrategy.TopBottomStrategy, TradeDirection.NONE, stock, today, today, marketPrice);
+        double marketPrice = context.getMarketPrice();
+        TradeAction action = new TradeAction(Strategies.TopBottomStrategy, TradeDirection.NONE, stock, today, today, marketPrice);
         if (isTriggerTrade(stock, window, action, date, market)) {
             System.out.println("----------------------------------------->>>>> TopBottomStrategy : Today: " + today + "  Action: " + action.getTradeDirection().toString() + " market: " + marketPrice);
             result.add(action);
@@ -174,7 +174,7 @@ public class TopBottomStrategy extends AbstractTradeStrategy implements Strategy
     }
 
 
-    private boolean isTriggerTrade(Stock stock, TimeWindow window, Order action, Date analysisDate, HistoricalData market) {
+    private boolean isTriggerTrade(Stock stock, TimeWindow window, TradeAction action, Date analysisDate, HistoricalData market) {
         List<MarketPeak> top = this.getPeaks(stock.getCode(), window, Peak.TOP);
         List<MarketPeak> bom = this.getPeaks(stock.getCode(), window, Peak.BOTTOM);
 

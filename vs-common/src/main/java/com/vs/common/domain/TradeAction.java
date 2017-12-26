@@ -2,7 +2,7 @@ package com.vs.common.domain;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.vs.common.domain.enums.TradeStrategy;
+import com.vs.common.domain.enums.Strategies;
 import com.vs.common.domain.enums.TradeDirection;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -21,9 +21,9 @@ import java.util.Map;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class Order implements Comparable<Order> {
+public class TradeAction implements Comparable<TradeAction> {
 
-    private TradeStrategy strategy;
+    private Strategies strategy;
     private TradeDirection tradeDirection;
     private Stock stock;
     private Date analysisDate;
@@ -31,12 +31,12 @@ public class Order implements Comparable<Order> {
     private double tradePrice;
     private boolean nettingHandled = false;
 
-    public Order(TradeStrategy strategy, TradeDirection direction, Stock stock, Date analysisDate, Date tradeDate) {
+    public TradeAction(Strategies strategy, TradeDirection direction, Stock stock, Date analysisDate, Date tradeDate) {
         this(strategy,direction,stock,analysisDate,tradeDate,-1);
     }
 
 
-    public Order(TradeStrategy strategy, TradeDirection direction, Stock stock, Date analysisDate, Date tradeDate, double tradePrice) {
+    public TradeAction(Strategies strategy, TradeDirection direction, Stock stock, Date analysisDate, Date tradeDate, double tradePrice) {
         this.strategy = strategy;
         this.tradeDirection = direction;
         this.stock = stock;
@@ -47,18 +47,18 @@ public class Order implements Comparable<Order> {
     }
 
     @Override
-    public int compareTo(Order o) {
+    public int compareTo(TradeAction o) {
         return this.tradeDate.compareTo(o.getTradeDate());
     }
 
 
-    public static List<Order> merge(final List<Order> actions){
-        Map<Date, Order> actionMap = Maps.newConcurrentMap();
+    public static List<TradeAction> merge(final List<TradeAction> actions){
+        Map<Date, TradeAction> actionMap = Maps.newConcurrentMap();
         Collections.sort(actions);
 
-        for ( Order a : actions ){
+        for ( TradeAction a : actions ){
             if ( actionMap.containsKey(a.getTradeDate()) ){
-                Order curr = actionMap.get(a.getTradeDate());
+                TradeAction curr = actionMap.get(a.getTradeDate());
 
                 if ( a.getTradeDirection().isHigherPriorityThan(curr.getTradeDirection()) ){
                     actionMap.put(a.getTradeDate(), a);
@@ -71,20 +71,20 @@ public class Order implements Comparable<Order> {
         return Lists.newArrayList(actionMap.values());
     }
 
-    public static List<Order> merge(final List<Order> actions, boolean andOption){
+    public static List<TradeAction> merge(final List<TradeAction> actions, boolean andOption){
 
-        List<Order> forMergeActions = andOption ? and(actions) : actions;
+        List<TradeAction> forMergeActions = andOption ? and(actions) : actions;
         return merge(forMergeActions);
     }
 
-    private static List<Order> and(List<Order> actions){
+    private static List<TradeAction> and(List<TradeAction> actions){
 
         if ( actions == null || actions.size() == 0 )
             return Lists.newArrayList();
 
-        for ( Order a : actions ){
+        for ( TradeAction a : actions ){
             // if STOP loss, execute STOP loss order directly
-            if ( a.getStrategy().name().equalsIgnoreCase(TradeStrategy.StopLossStrategy.toString()) && a.getTradeDirection().equals(TradeDirection.SELL)){
+            if ( a.getStrategy().name().equalsIgnoreCase(Strategies.StopLossStrategy.toString()) && a.getTradeDirection().equals(TradeDirection.SELL)){
                 return Lists.newArrayList(a);
             }
         }
@@ -95,7 +95,7 @@ public class Order implements Comparable<Order> {
         }
 
         TradeDirection dir0 = actions.get(0).getTradeDirection();
-        for ( Order a : actions ){
+        for ( TradeAction a : actions ){
             // and failed, not all buy
             if ( dir0.isBuy() && ! a.getTradeDirection().isBuy() ){
                 return Lists.newArrayList();

@@ -11,7 +11,7 @@ public enum Market {
     private final static String SHANGHAI_SHENZHEN_300_INDEX = "000300";
     private final static String SHANGHAI_50ETF_INDEX = "510050";
 
-    public static Market getMarket( String stockCode ){
+    public static Market toMarket(String stockCode ){
         if ( stockCode.startsWith(SHANGHAI_PREFIX_6)
                 || SHANGHAI_INDEX.equals(stockCode)
                 || stockCode.startsWith(SHANGHAI_INDEX)

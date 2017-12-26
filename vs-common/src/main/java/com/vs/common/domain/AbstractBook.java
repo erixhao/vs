@@ -14,9 +14,9 @@ import java.util.List;
 @Data
 public abstract class AbstractBook {
     protected Stock stock;
+    protected MarkToMarket markToMarket;
     @Getter
     protected List<Transaction> transactions = Lists.newArrayList();
-    protected MarkToMarket markToMarket;
 
     public long getPositions() {
         long positions = 0;
@@ -124,7 +124,7 @@ public abstract class AbstractBook {
     protected void book(Transaction t, boolean nettingHandled) {
         this.transactions.add(t);
         this.markToMarket.setAvailCapital(this.calculateCapital(t));
-        t.setCurrentTadeProfit(this.calculatePnL(t.getPrice()));
+        t.setCurrentTradePnL(this.calculatePnL(t.getPrice()));
 
 
         if (!nettingHandled && t.getDirection().equals(TradeDirection.SELL)) {

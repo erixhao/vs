@@ -101,7 +101,7 @@ public class Dividends {
                 tran.setPositions((long) (tran.getPositions() * raio));
                 tran.setNetPositions((long) (tran.getNetPositions() * raio));
                 tran.setPrice(tran.getPrice() / raio);
-                tran.setDividentSplit(true);
+                tran.setDividendsSplit(true);
                 //log.info("++++++++++++++++++++++++ adjustTradeDividendsSplit, after tran: " + tran.toString() );
 
             }

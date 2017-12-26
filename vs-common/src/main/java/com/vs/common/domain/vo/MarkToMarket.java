@@ -4,6 +4,8 @@ import com.vs.common.domain.Stock;
 import lombok.Data;
 import lombok.Getter;
 
+import java.util.Date;
+
 /**
  * Created by erix-mac on 2017/12/24.
  */
@@ -12,6 +14,7 @@ public class MarkToMarket {
     @Getter
     private Stock stock;
 
+    private Date marketDate;
     private double marketPrice;
     private final double totalCapital;
     private double availCapital;

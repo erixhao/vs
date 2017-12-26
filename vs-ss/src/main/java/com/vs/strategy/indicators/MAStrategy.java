@@ -3,23 +3,23 @@ package com.vs.strategy.indicators;
 import com.google.common.collect.Lists;
 import com.vs.common.domain.HistoricalData;
 import com.vs.common.domain.Stock;
+import com.vs.common.domain.TradeAction;
 import com.vs.common.domain.TradingBook;
-import com.vs.common.domain.Order;
 import com.vs.common.domain.enums.BullBear;
+import com.vs.common.domain.enums.Strategies;
 import com.vs.common.domain.enums.TimePeriod;
 import com.vs.common.domain.enums.TradeDirection;
-import com.vs.common.domain.enums.TradeStrategy;
 import com.vs.common.domain.vo.TimeWindow;
-import com.vs.strategy.domain.TradeContext;
 import com.vs.common.utils.BeanContext;
 import com.vs.common.utils.DateUtils;
 import com.vs.market.MarketDataService;
 import com.vs.market.MarketService;
-import com.vs.strategy.AbstractTradeStrategy;
+import com.vs.strategy.AbstractStrategy;
 import com.vs.strategy.Strategy;
 import com.vs.strategy.analysis.indicators.MAAnalyze;
 import com.vs.strategy.common.MarketTrendAnalyze;
 import com.vs.strategy.domain.MAPeriod;
+import com.vs.strategy.domain.MarketContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -33,24 +33,24 @@ import static com.vs.common.utils.MarketDataUtils.extractMarkets;
  * Created by erix-mac on 2017/2/16.
  */
 @Component
-public class MAStrategy extends AbstractTradeStrategy implements Strategy {
+public class MAStrategy extends AbstractStrategy implements Strategy {
 
     private final static int STAY_DAYS = 3;
 
     @Override
     public String getName() {
-            return TradeStrategy.MAStrategy.toString();
+            return Strategies.MAStrategy.toString();
     }
     @Autowired
     private MarketTrendAnalyze marketTrendAnalyze;
 
 
     @Override
-    public List<Order> analysis(TradeContext info) {
-        List<Order> result = Lists.newArrayList();
+    public List<TradeAction> execute(MarketContext context) {
+        List<TradeAction> result = Lists.newArrayList();
 
-        Stock stock = info.getStock();
-        Date date = info.getAnalysisDate();
+        Stock stock = context.getStock();
+        Date date = context.getAnalysisDate();
 
         BullBear stockTrend = marketTrendAnalyze.analysisTrend(stock.getCode(),date);
 
@@ -61,11 +61,11 @@ public class MAStrategy extends AbstractTradeStrategy implements Strategy {
 
 
         List<HistoricalData> datas = this.marketService.getMarketHistoricalData(stock.getCode(), TimePeriod.DAILY);
-        HistoricalData next  = this.getNextHistoricalDate(info);
+        HistoricalData next  = this.getNextHistoricalDate(context);
 
-        Order action = new Order(TradeStrategy.MAStrategy, TradeDirection.NONE,stock,date, date);
+        TradeAction action = new TradeAction(Strategies.MAStrategy, TradeDirection.NONE,stock,date, date);
 
-        //DebugStopUtils.debugAt(date, "2017-08-24");
+        //DebugUtils.debugAt(date, "2017-08-24");
         TradeDirection direction20 = this.analysisMAStrategy(datas, date, MAPeriod.MA20);
         //TradeDirection direction60 = this.analysisMAStrategy(datas, date, MAPeriod.MA60);
         //System.out.println("Date: " + date.toString() + " Acton20: " + direction20.toString() + " Action 60:" + direction60 + " action 60 == 20 ?" + direction20.equals(direction60));
@@ -142,7 +142,7 @@ public class MAStrategy extends AbstractTradeStrategy implements Strategy {
         Date date = DateUtils.toMarketDate("2017-08-24");
 
         TradingBook tradingBook = new TradingBook(stock,marketPrice);
-        TradeContext info = new TradeContext(tradingBook, date, TimeWindow.getLastMonths(TimePeriod.DAILY,-1),TimePeriod.DAILY,marketPrice);
-        maStrategy.analysis(info);
+        MarketContext info = new MarketContext(tradingBook, date, TimeWindow.getLastMonths(TimePeriod.DAILY,-1),TimePeriod.DAILY,marketPrice);
+        maStrategy.execute(info);
     }
 }

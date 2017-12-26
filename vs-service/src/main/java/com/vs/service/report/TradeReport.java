@@ -3,8 +3,6 @@ package com.vs.service.report;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.vs.common.domain.*;
-import com.vs.common.domain.HistoricalData;
-import com.vs.common.domain.PnL;
 import com.vs.common.domain.vo.TimeWindow;
 import com.vs.common.utils.BeanContext;
 import com.vs.common.utils.DataFormatUtil;
@@ -43,7 +41,7 @@ public class TradeReport {
 				tradingBook.getMarkToMarket().setAvailCapital(tradingBook.getMarkToMarket().getTotalCapital());
 				for(Transaction transaction : tradingBook.getTransactions()){
 					//trade.makeTransaction(transaction);
-					PnL p = transaction.getCurrentTadeProfit();
+					PnL p = transaction.getCurrentTradePnL();
 					log.info(String.format(DETAIL_STR, 
 							transaction.getTransactionDate(),
 							transaction.getDirection(),

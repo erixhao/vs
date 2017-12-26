@@ -3,14 +3,14 @@ package com.vs.strategy.gann;
 import com.google.common.collect.Lists;
 import com.vs.common.domain.HistoricalData;
 import com.vs.common.domain.Stock;
-import com.vs.common.domain.Order;
+import com.vs.common.domain.TradeAction;
 import com.vs.common.domain.enums.BullBear;
+import com.vs.common.domain.enums.Strategies;
 import com.vs.common.domain.enums.TradeDirection;
-import com.vs.common.domain.enums.TradeStrategy;
 import com.vs.common.domain.enums.Trend;
-import com.vs.strategy.domain.TradeContext;
-import com.vs.strategy.AbstractTradeStrategy;
+import com.vs.strategy.AbstractStrategy;
 import com.vs.strategy.Strategy;
+import com.vs.strategy.domain.MarketContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -21,7 +21,7 @@ import java.util.List;
  * Created by erix-mac on 15/9/5.
  */
 @Component
-public class HighLowMoveStrategy extends AbstractTradeStrategy implements Strategy {
+public class HighLowMoveStrategy extends AbstractStrategy implements Strategy {
 
     final static double DELTA_PERCENTAGE = 5;
     final static double DELTA_INDEX_PERCENTAGE = 3;
@@ -36,26 +36,26 @@ public class HighLowMoveStrategy extends AbstractTradeStrategy implements Strate
 
     @Override
     public String getName() {
-        return TradeStrategy.HighLowMoveStrategy.toString();
+        return Strategies.HighLowMoveStrategy.toString();
     }
 
     @Override
-    public List<Order> analysis(final TradeContext info){
-        List<Order> result = Lists.newArrayList();
+    public List<TradeAction> execute(final MarketContext context){
+        List<TradeAction> result = Lists.newArrayList();
 
-        Stock stock = info.getStock();
-        Date date = info.getAnalysisDate();
+        Stock stock = context.getStock();
+        Date date = context.getAnalysisDate();
 
-        HistoricalData d0 = this.getMarketDataT(info);
-        HistoricalData p1 = this.getMarketDataT(info, -1);
-        HistoricalData p2 = this.getMarketDataT(info,-2);
-        HistoricalData p3 = this.getMarketDataT(info,-3);
-        HistoricalData next  = this.getNextHistoricalDate(info);
+        HistoricalData d0 = this.getMarketDataT(context);
+        HistoricalData p1 = this.getMarketDataT(context, -1);
+        HistoricalData p2 = this.getMarketDataT(context,-2);
+        HistoricalData p3 = this.getMarketDataT(context,-3);
+        HistoricalData next  = this.getNextHistoricalDate(context);
 
         if ( d0 == null )
             return result;
 
-        Order action = new Order(TradeStrategy.HighLowMoveStrategy, TradeDirection.NONE,stock,date, date);
+        TradeAction action = new TradeAction(Strategies.HighLowMoveStrategy, TradeDirection.NONE,stock,date, date);
 
         // use close/open
         double delta = this.calcDelta(p3, d0.getClose());
@@ -70,7 +70,7 @@ public class HighLowMoveStrategy extends AbstractTradeStrategy implements Strate
                 action.setTradeDirection(TradeDirection.BUY);
             }
         }else if (moveToLow(p3, p2) && moveToLow(p2, p1) && moveToLow(p1, d0) && isDelta){
-            if ( stockTrend.isBigBull() && info.isTradeProfitable() ) {
+            if ( stockTrend.isBigBull() && context.isTradeProfitable() ) {
                 //System.out.println(">>>>>>> Profit: " + info.getTrade().getProfit().getTotalProfitPercentage());
             }else{
 
@@ -78,7 +78,7 @@ public class HighLowMoveStrategy extends AbstractTradeStrategy implements Strate
             action.setTradeDirection(TradeDirection.SELL);
         }else{
             //BullBear indexTrend = indexTrendStrategy.analysisTrend(date);
-            //action = highLowMoveOptimisticStrategy.analysis(info,datas,next,DELTA_INDEX_PERCENTAGE,DELTA_PERCENTAGE, indexTrend);
+            //action = highLowMoveOptimisticStrategy.execute(info,datas,next,DELTA_INDEX_PERCENTAGE,DELTA_PERCENTAGE, indexTrend);
         }
 
         return this.addTradeAction(result, action, next, date);

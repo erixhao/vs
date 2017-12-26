@@ -8,8 +8,6 @@ import java.util.Date;
 
 @Data
 public abstract class AbstractMarketData extends Stock implements Comparable<AbstractMarketData>, Serializable {
-
-
     protected long id;
     protected Date date;
     protected double yesterdayClose;

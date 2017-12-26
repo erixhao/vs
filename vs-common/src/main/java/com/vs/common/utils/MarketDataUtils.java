@@ -2,7 +2,7 @@ package com.vs.common.utils;
 
 import com.google.common.collect.Lists;
 import com.vs.common.domain.HistoricalData;
-import com.vs.common.domain.enums.MarketIndex;
+import com.vs.common.domain.enums.MarketIndexs;
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.stereotype.Component;
 
@@ -217,7 +217,7 @@ public final class MarketDataUtils {
         if (d == null)
             return false;
 
-        if (!MarketIndex.isIndex(d.getCode()) && (d.getVolume() == 0 && d.getOpen() == d.getClose() && d.getOpen() == d.getHigh()))
+        if (!MarketIndexs.isIndex(d.getCode()) && (d.getVolume() == 0 && d.getOpen() == d.getClose() && d.getOpen() == d.getHigh()))
             return false;
 
         return isTradingDate(d.getDate());

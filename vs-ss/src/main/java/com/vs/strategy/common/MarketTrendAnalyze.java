@@ -14,7 +14,6 @@ import com.vs.strategy.domain.MarketIndicatorConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.text.DecimalFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -28,8 +27,6 @@ import static com.vs.common.utils.MarketDataUtils.indexBoundsCheck;
  */
 @Component
 public class MarketTrendAnalyze {
-    public static final DecimalFormat FORMAT = new DecimalFormat("0.##");
-
     @Autowired
     protected MarketDataService marketDataService;
     private static final ConcurrentMap<String, BullBear> MARKET_TREND_MAP = Maps.newConcurrentMap();
@@ -46,13 +43,13 @@ public class MarketTrendAnalyze {
         List<HistoricalData> marketDatas = marketDataService.getMarketHistoricalData(code,TimePeriod.DAILY);
 
         if ( MARKET_TREND_MAP.size() == 0 ){
-            initliziation(code, window);
+            initialization(code, window);
         }
 
         return this.analysisAndPutCache(marketDatas,code, date);
     }
 
-    private void initliziation(String code, TimeWindow timeWindow){
+    private void initialization(String code, TimeWindow timeWindow){
         if ( timeWindow == null )
             return;
 
@@ -218,7 +215,7 @@ public class MarketTrendAnalyze {
         while ( mktDate.before(end) || mktDate.equals(end) ){
             BullBear t = this.analysisTimeWindowTrend(code, mktDate, window);
 
-            sb.append("\n" + String.format(DETAIL_STR,DateUtils.toMarketDate(mktDate),code, t.getChiness()));
+            sb.append("\n" + String.format(DETAIL_STR,DateUtils.toMarketDate(mktDate),code, t.getChinese()));
 
             calendar.setTime(mktDate);
             calendar.add(period.getCalenda(), 1);
