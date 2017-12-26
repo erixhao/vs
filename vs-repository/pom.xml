@@ -10,7 +10,7 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>vs-dao</artifactId>
+    <artifactId>vs-repository</artifactId>
 
     <dependencies>
         <dependency>
