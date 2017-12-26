@@ -49,7 +49,7 @@ public class MarketDataService {
     //private final static Map<String, List<Dividends>> dividends = Maps.newConcurrentMap();
 
     @Autowired
-    private SinaMarketDataService liveDataService;
+    private SinaMarketDataProvider liveDataService;
 
     @Autowired
     private MarketService marketService;
