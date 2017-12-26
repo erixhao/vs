@@ -13,6 +13,15 @@
         <spring.version>4.1.6.RELEASE</spring.version>
     </properties>
 
+    <modules>
+        <module>../vs-common</module>
+        <module>../vs-dao</module>
+        <module>../vs-market</module>
+        <module>../vs-service</module>
+        <module>../vs-ss</module>
+        <module>../vs-ui</module>
+    </modules>
+
     <!--  <parent>
           <groupId>org.springframework.boot</groupId>
           <artifactId>spring-boot-starter-parent</artifactId>
