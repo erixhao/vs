@@ -10,9 +10,9 @@
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="module" module-name="vs-common" />
     <orderEntry type="module" module-name="vs-service" />
-    <orderEntry type="module" module-name="vs-market" />
-    <orderEntry type="module" module-name="vs-dao" />
+    <orderEntry type="module" module-name="vs-repository" />
     <orderEntry type="module" module-name="vs-ss" />
+    <orderEntry type="module" module-name="vs-market" />
     <orderEntry type="library" name="Maven: org.springframework:spring-context:4.1.6.RELEASE" level="project" />
     <orderEntry type="library" name="Maven: org.springframework:spring-aop:4.1.6.RELEASE" level="project" />
     <orderEntry type="library" name="Maven: aopalliance:aopalliance:1.0" level="project" />
