@@ -36,7 +36,7 @@ import static com.vs.common.utils.DateUtils.*;
  */
 @Service
 @Slf4j
-public class SinaMarketDataService {
+public class SinaMarketDataProvider {
 
     public static final String SINA_FINANCE_URL_TODAY = "http://hq.sinajs.cn/list=";
     public static final String SINA_FINANCE_URL_HISTORY = "http://money.finance.sina.com.cn/corp/go.php/vMS_MarketHistory/stockid/{0}.phtml?year={1}&jidu={2}";
@@ -345,7 +345,7 @@ public class SinaMarketDataService {
 
     public static void main(String args[]) throws Exception {
 
-       Map<String, LiveData> market = new SinaMarketDataService().getMarketLiveData("sh600577,sh600030");
+       Map<String, LiveData> market = new SinaMarketDataProvider().getMarketLiveData("sh600577,sh600030");
 
 
         for (Map.Entry<String, LiveData> stock : market.entrySet()) {
@@ -353,7 +353,7 @@ public class SinaMarketDataService {
             System.out.println(stock.getValue());
         }
 
-        Map<String, LiveData> indexs = new SinaMarketDataService().getAllMarketIndexs();
+        Map<String, LiveData> indexs = new SinaMarketDataProvider().getAllMarketIndexs();
         for (Map.Entry<String, LiveData> stock : indexs.entrySet()) {
             System.out.println(stock.getKey());
             System.out.println(stock.getValue());

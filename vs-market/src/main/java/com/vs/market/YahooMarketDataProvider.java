@@ -26,7 +26,7 @@ import java.util.*;
  */
 @Service
 @Slf4j
-public class YahooMarketDataService {
+public class YahooMarketDataProvider {
 
     public static final String YAHOO_FINANCE_URL = "http://table.finance.yahoo.com/table.csv?";
     public static final String YAHOO_FINANCE_URL_TODAY = "http://download.finance.yahoo.com/d/quotes.csv?";
@@ -204,15 +204,15 @@ public class YahooMarketDataService {
     public static void main(String args[]) throws Exception {
         System.out.println(">>>>> Yahoo:");
 
-        //MarketData data = new YahooMarketDataService().getTodayMarketData("000002.SZ");
+        //MarketData data = new YahooMarketDataProvider().getTodayMarketData("000002.SZ");
         //System.out.println("Today: " + data);
 
         // 沪市后缀名.ss 例子： 沪深300 000300.ss ,深市后缀名 .sz 例子： 399106.sz
-        //List<MarketData> market = new YahooMarketDataService().getMarketData("600577.ss", TimePeriod.DAILY, 10);
-        //List<HistoricalData> market = new YahooMarketDataService().getMarketData("000001.ss", TimePeriod.WEEKLY, 60);
-        //List<HistoricalData> market = new YahooMarketDataService().getMarketData("300168.sz", TimePeriod.DAILY, 10);
+        //List<MarketData> market = new YahooMarketDataProvider().getMarketData("600577.ss", TimePeriod.DAILY, 10);
+        //List<HistoricalData> market = new YahooMarketDataProvider().getMarketData("000001.ss", TimePeriod.WEEKLY, 60);
+        //List<HistoricalData> market = new YahooMarketDataProvider().getMarketData("300168.sz", TimePeriod.DAILY, 10);
 
-        List<HistoricalData> market = new YahooMarketDataService().getMarketData("600577.ss", TimePeriod.DAILY, 10);
+        List<HistoricalData> market = new YahooMarketDataProvider().getMarketData("600577.ss", TimePeriod.DAILY, 10);
 
 
         for (MarketData m : market) {

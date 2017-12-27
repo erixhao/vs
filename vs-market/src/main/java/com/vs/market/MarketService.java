@@ -26,10 +26,10 @@ public class MarketService {
     @Autowired
     private MarketDataDAO marketDataDAO;
     @Autowired
-    private SinaMarketDataService sinaMarketDataService;
+    private SinaMarketDataProvider sinaMarketDataProvider;
 
     @Autowired
-    private YahooMarketDataService yahooMarketDataService;
+    private YahooMarketDataProvider yahooMarketDataProvider;
     @Autowired
     private MarketDataService marketDataService;
 
@@ -98,9 +98,9 @@ public class MarketService {
         List<HistoricalData> mktData;
 
         if ( lastDays != -1 ){
-            mktData = this.sinaMarketDataService.getMarketDataIncremental(code, DateUtils.getLastDate(lastDays));
+            mktData = this.sinaMarketDataProvider.getMarketDataIncremental(code, DateUtils.getLastDate(lastDays));
         }else {
-            mktData = this.sinaMarketDataService.getMarketData(code);
+            mktData = this.sinaMarketDataProvider.getMarketData(code);
         }
 
         this.marketDataDAO.insert(mktData);
@@ -109,7 +109,7 @@ public class MarketService {
 
     private int updateMarketDataIncremental(String code) {
         Date currMarketDate = this.marketDataDAO.getLatestMarketData(code).getDate();
-        List<HistoricalData> mktData = this.sinaMarketDataService.getMarketDataIncremental(code, currMarketDate);
+        List<HistoricalData> mktData = this.sinaMarketDataProvider.getMarketDataIncremental(code, currMarketDate);
         List<HistoricalData> incremental = Lists.newArrayList();
 
         if ( mktData == null || mktData.size() == 0 )

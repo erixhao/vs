@@ -34,7 +34,7 @@ public class MarketDataDownloadTask implements Runnable{
     private boolean isDividends;
 
     @Autowired
-    private YahooMarketDataService marketDataService;
+    private YahooMarketDataProvider marketDataService;
 
     private MarketService marketService;
 

@@ -4,7 +4,6 @@ import com.google.common.collect.Lists;
 import com.vs.common.domain.enums.TradeDirection;
 import com.vs.common.domain.vo.MarkToMarket;
 import lombok.Data;
-import lombok.Getter;
 
 import java.util.List;
 
@@ -15,7 +14,6 @@ import java.util.List;
 public abstract class AbstractBook {
     protected Stock stock;
     protected MarkToMarket markToMarket;
-    @Getter
     protected List<Transaction> transactions = Lists.newArrayList();
 
     public long getPositions() {
