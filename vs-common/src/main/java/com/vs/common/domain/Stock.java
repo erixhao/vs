@@ -1,6 +1,7 @@
 package com.vs.common.domain;
 
 import com.google.common.collect.Lists;
+import com.vs.common.domain.annotation.MapInfo;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.util.StringUtils;
@@ -12,58 +13,42 @@ import java.util.List;
  */
 @Data
 @NoArgsConstructor
-public class Stock {
+public class Stock extends Entity {
 
-    private static final List<String> PRE_SHANGHAI_SHENZHENG = Lists.newArrayList("600","601","603","000","002","300");
+    private static final List<String> PRE_SHANGHAI_SHENZHENG = Lists.newArrayList("600", "601", "603", "000", "002", "300");
     private static final int STOCK_CODE_MIN_LEN = 6;
 
+    @MapInfo(name = "code", position = 0)
     private String code;
+    @MapInfo(name = "name", position = 1)
     private String name;
 
-    public Stock(String code){
+    public Stock(String code) {
         this.code = code;
         this.name = code;
     }
 
-    public Stock(String code, String name){
+    public Stock(String code, String name) {
         this.code = code;
         this.name = name;
     }
 
-    public boolean isIndex(){
+    public boolean isIndex() {
         return isIndex(code);
     }
 
-    public static boolean isIndex(String code){
-        return code.indexOf("s") > -1 && code.indexOf("s") == code.length() -1;
+    public static boolean isIndex(String code) {
+        return code.indexOf("s") > -1 && code.indexOf("s") == code.length() - 1;
     }
 
-    public static boolean isValidStockCode( String code ){
-        if ( StringUtils.isEmpty(code) && code.length() < STOCK_CODE_MIN_LEN )
+    public static boolean isValidStockCode(String code) {
+        if (StringUtils.isEmpty(code) && code.length() < STOCK_CODE_MIN_LEN)
             return false;
 
-        if ( code.indexOf("s") > -1 ){
+        if (code.indexOf("s") > -1) {
             return isIndex(code);
-        }else{
-            return code.matches("[0-9]{6}") && PRE_SHANGHAI_SHENZHENG.contains(code.substring(0,3));
-
+        } else {
+            return code.matches("[0-9]{6}") && PRE_SHANGHAI_SHENZHENG.contains(code.substring(0, 3));
         }
-    }
-
-
-
-    public static void main(String[] args){
-        System.out.println("123321: " + Stock.isValidStockCode("123321"));
-        System.out.println("afd: " + Stock.isValidStockCode("afd"));
-        System.out.println("600: " + Stock.isValidStockCode("600"));
-        System.out.println("600030: " + Stock.isValidStockCode("600030"));
-
-        System.out.println("000001s: " + Stock.isValidStockCode("000001s"));
-        System.out.println("00000s1: " + Stock.isValidStockCode("00000s1"));
-        System.out.println("002230: " + Stock.isValidStockCode("002230"));
-
-
-
-
     }
 }

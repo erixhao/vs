@@ -6,7 +6,7 @@ import lombok.Data;
  * Created by erix-mac on 15/8/2.
  */
 @Data
-public class LiveData extends AbstractMarketData {
+public class LiveData extends MarketData {
     public static final String MARKET_DATE_FORMAT = "MM-dd-yyyy";
 
 

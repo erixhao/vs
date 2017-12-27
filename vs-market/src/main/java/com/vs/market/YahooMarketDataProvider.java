@@ -1,8 +1,9 @@
 package com.vs.market;
 
 
-import com.vs.common.domain.AbstractMarketData;
+import com.vs.common.domain.MarketData;
 import com.vs.common.domain.HistoricalData;
+import com.vs.common.domain.MarketData;
 import com.vs.common.domain.enums.MarketIndexs;
 import com.vs.common.domain.enums.MarketProvider;
 import com.vs.common.domain.enums.TimePeriod;
@@ -33,21 +34,20 @@ public class YahooMarketDataProvider {
     private final static String MARKET_STOCK_LOCATION = "market.location";
 
 
-
-    public List<HistoricalData> getMarketData(MarketIndexs index, TimePeriod period, int historyDays ){
+    public List<HistoricalData> getMarketData(MarketIndexs index, TimePeriod period, int historyDays) {
         return getMarketData(index.getCode(MarketProvider.YAHOO), period, historyDays);
     }
 
 
-    public List<HistoricalData> getAllMarketData(String stockName){
+    public List<HistoricalData> getAllMarketData(String stockName) {
         return this.getMarketData(stockName, TimePeriod.DAILY, -1);
     }
 
-    public Map<String, List<HistoricalData>> getMarketData(String[] stockName, TimePeriod period, int historyDays){
+    public Map<String, List<HistoricalData>> getMarketData(String[] stockName, TimePeriod period, int historyDays) {
         Map<String, List<HistoricalData>> map = new HashMap<>();
 
-        for ( String stock : stockName ){
-            map.put(stock,this.getMarketData(stock,period,historyDays));
+        for (String stock : stockName) {
+            map.put(stock, this.getMarketData(stock, period, historyDays));
         }
 
         return map;
@@ -77,7 +77,7 @@ public class YahooMarketDataProvider {
 
 
     @SneakyThrows(IOException.class)
-    public List<HistoricalData> getMarketData(String stockName, TimePeriod period, int historyDays){
+    public List<HistoricalData> getMarketData(String stockName, TimePeriod period, int historyDays) {
 
         List<HistoricalData> datas = new ArrayList<>();
 
@@ -101,7 +101,7 @@ public class YahooMarketDataProvider {
     }
 
     @SneakyThrows(IOException.class)
-    public AbstractMarketData getTodayMarketData(String stockName) throws Exception {
+    public MarketData getTodayMarketData(String stockName) throws Exception {
 
         String response = "";
         String url = extractTodayURL(stockName);
@@ -123,9 +123,9 @@ public class YahooMarketDataProvider {
     }
 
     @SneakyThrows(ParseException.class)
-    private HistoricalData extractHistroricalMarketData(String code, String response, boolean isLive, TimePeriod timePeriod){
+    private HistoricalData extractHistroricalMarketData(String code, String response, boolean isLive, TimePeriod timePeriod) {
 
-        if ( response == null || response.length() == 0 )
+        if (response == null || response.length() == 0)
             return null;
 
         HistoricalData m = new HistoricalData();
@@ -169,11 +169,11 @@ public class YahooMarketDataProvider {
         return m;
     }*/
 
-    public static String extractURL(String stockName, TimePeriod timePeriod, int historyDays, boolean isDividends){
+    public static String extractURL(String stockName, TimePeriod timePeriod, int historyDays, boolean isDividends) {
         String url = "";
         String period = "";
 
-        if ( historyDays > 0 ) {
+        if (historyDays > 0) {
             Calendar cal = Calendar.getInstance(Locale.CHINESE);
             int endMonth = cal.get(Calendar.MONTH);
             int endDay = cal.get(Calendar.DAY_OF_MONTH);
@@ -196,9 +196,8 @@ public class YahooMarketDataProvider {
     }
 
 
-
     public static String extractTodayURL(String stockName) {
-       return YAHOO_FINANCE_URL_TODAY + "s=" + stockName + "&f=d1ohgl1vl1kj";
+        return YAHOO_FINANCE_URL_TODAY + "s=" + stockName + "&f=d1ohgl1vl1kj";
 
     }
 
@@ -216,7 +215,7 @@ public class YahooMarketDataProvider {
         List<HistoricalData> market = new YahooMarketDataProvider().getMarketData("600577.ss", TimePeriod.DAILY, 10);
 
 
-        for ( AbstractMarketData m : market ){
+        for (MarketData m : market) {
             System.out.println(m.toString());
         }
 
