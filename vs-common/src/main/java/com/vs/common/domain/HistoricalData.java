@@ -14,7 +14,7 @@ import java.util.TimeZone;
  */
 @Data
 @Slf4j
-public class HistoricalData extends AbstractMarketData {
+public class HistoricalData extends MarketData {
     public static final String MARKET_DATE_FORMAT = "yyyy-MM-dd";
     public static final String MARKET_SHORT_DATE_FORMAT = "MM/dd";
     public static final String YYYYMMDD_FORMAT = "yyyyMMdd";

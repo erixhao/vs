@@ -7,41 +7,40 @@ import java.io.Serializable;
 import java.util.Date;
 
 @Data
-public abstract class AbstractMarketData extends Stock implements Comparable<AbstractMarketData>, Serializable {
+public abstract class MarketData extends Stock implements Comparable<MarketData>, Serializable {
     protected long id;
     protected Date date;
     protected double yesterdayClose;
     protected double open;
+    protected double close;
     protected double high;
     protected double low;
-    protected double close;
     protected double adjClose;
     protected long volume;
     protected double volumeAmount;
     protected Date updateDate;
 
-    public double getPercentage(){
-        if ( this.yesterdayClose == 0 )
+    public double getPercentage() {
+        if (this.yesterdayClose == 0)
             return 0;
         else
-            return (this.close - this.yesterdayClose) * 100/this.yesterdayClose;
+            return (this.close - this.yesterdayClose) * 100 / this.yesterdayClose;
     }
 
-    public boolean isCloseUp(){
+    public boolean isCloseUp() {
         return close >= open;
     }
 
-    public boolean isCloseDown(){
+    public boolean isCloseDown() {
         return close < open;
     }
 
-    public String timeZoneDate(){
+    public String timeZoneDate() {
         return DateUtils.withTimeZoneFormat(date);
     }
 
 
-
-    protected void clear(){
+    protected void clear() {
         this.open = 0;
         this.close = 0;
         this.high = 0;
@@ -51,7 +50,7 @@ public abstract class AbstractMarketData extends Stock implements Comparable<Abs
     }
 
     @Override
-    public int compareTo(AbstractMarketData o) {
+    public int compareTo(MarketData o) {
         return this.date.compareTo(o.getDate());
     }
 
