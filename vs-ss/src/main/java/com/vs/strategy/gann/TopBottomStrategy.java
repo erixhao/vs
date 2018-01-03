@@ -12,6 +12,7 @@ import com.vs.common.domain.enums.TradeDirection;
 import com.vs.common.domain.enums.Trend;
 import com.vs.common.domain.vo.TimeWindow;
 import com.vs.common.utils.DateUtils;
+import com.vs.repository.MarketDataRepository;
 import com.vs.strategy.AbstractStrategy;
 import com.vs.strategy.Strategy;
 import com.vs.strategy.analysis.ExtremeAnalyze;
@@ -24,6 +25,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.time.Duration;
+import java.time.LocalDate;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -55,7 +58,7 @@ public class TopBottomStrategy extends AbstractStrategy implements Strategy {
 
     private Map<String, Map<TimeWindow, List<MarketPeak>>> topMap = Maps.newConcurrentMap();
     private Map<String, Map<TimeWindow, List<MarketPeak>>> bottomMap = Maps.newConcurrentMap();
-    private Date peakAnalyzeDate;
+    private LocalDate peakAnalyzeDate;
 
     private void cleanUp() {
         this.peakMonitor = null;
@@ -68,7 +71,7 @@ public class TopBottomStrategy extends AbstractStrategy implements Strategy {
         return map == null ? null : map.get(window);
     }
 
-    private void setPeaks(String code, TimeWindow window, Peak peak, Date date, List<MarketPeak> peaks) {
+    private void setPeaks(String code, TimeWindow window, Peak peak, LocalDate date, List<MarketPeak> peaks) {
         Map<TimeWindow, List<MarketPeak>> map = peak.equals(Peak.TOP) ? topMap.get(code) : bottomMap.get(code);
 
         if (map == null) {
@@ -88,24 +91,24 @@ public class TopBottomStrategy extends AbstractStrategy implements Strategy {
     }
 
 
-    private void initPeaksMap(Stock stock, TimeWindow window, Date analysisDate) {
+    private void initPeaksMap(Stock stock, TimeWindow window, LocalDate analysisDate) {
 
-        List<MarketPeak> topPeaks = this.getPeaks(stock.getCode(),window, Peak.TOP);
-        List<MarketPeak> bomPeaks = this.getPeaks(stock.getCode(),window,Peak.BOTTOM);
-        int dateGap = DateUtils.daysBetween(this.peakAnalyzeDate, analysisDate);
+        List<MarketPeak> topPeaks = this.getPeaks(stock.getCode(), window, Peak.TOP);
+        List<MarketPeak> bomPeaks = this.getPeaks(stock.getCode(), window, Peak.BOTTOM);
+        long dateGap = Duration.between(this.peakAnalyzeDate, analysisDate).toDays();//DateUtils.daysBetween(this.peakAnalyzeDate, analysisDate);
 
-        if ((topPeaks == null || topPeaks.size() == 0) || (bomPeaks == null || bomPeaks.size() == 0) ) {
-            extractUpdatePeaks(stock, window, analysisDate,this.month);
+        if ((topPeaks == null || topPeaks.size() == 0) || (bomPeaks == null || bomPeaks.size() == 0)) {
+            extractUpdatePeaks(stock, window, analysisDate, this.month);
         }
 
-        this.updateLatestTop(stock,window, analysisDate,this.getCurrentMarket(stock.getCode(),analysisDate));
+        this.updateLatestTop(stock, window, analysisDate, this.getCurrentMarket(stock.getCode(), analysisDate));
     }
 
-    private void extractUpdatePeaks(Stock stock, TimeWindow window, Date analysisDate, int month ){
+    private void extractUpdatePeaks(Stock stock, TimeWindow window, LocalDate analysisDate, int month) {
         Map<Peak, List<MarketPeak>> peaks = extremeAnalyze.determinMarketPeaks(stock, TimeWindow.getTimeWindow(TimePeriod.DAILY, analysisDate, TIME_WINDOW, month, 0), TOP_RANK);
 
         this.setPeaks(stock.getCode(), window, Peak.TOP, analysisDate, MarketPeak.extractPeak(peaks.get(Peak.TOP), WEIGHT));
-        this.setPeaks(stock.getCode(), window, Peak.BOTTOM,analysisDate, MarketPeak.extractPeak(peaks.get(Peak.BOTTOM), WEIGHT));
+        this.setPeaks(stock.getCode(), window, Peak.BOTTOM, analysisDate, MarketPeak.extractPeak(peaks.get(Peak.BOTTOM), WEIGHT));
     }
 
 
@@ -115,16 +118,16 @@ public class TopBottomStrategy extends AbstractStrategy implements Strategy {
     }
 
     @Override
-    public List<TradeAction> execute(MarketContext context){
+    public List<TradeAction> execute(MarketContext context) {
         List<TradeAction> result = Lists.newArrayList();
 
         Stock stock = context.getStock();
-        Date date = context.getAnalysisDate();
+        LocalDate date = context.getAnalysisDate();
         TradingBook tradingBook = context.getTradingBook();
         TimeWindow window = context.getTimeWindow();
 
         HistoricalData market = this.getMarketDataT(context);
-        Date today = date;
+        LocalDate today = date;
 
         this.initPeaksMap(stock, window, date);
 
@@ -139,42 +142,42 @@ public class TopBottomStrategy extends AbstractStrategy implements Strategy {
     }
 
 
-    private void updateLatestTop(Stock stock, TimeWindow window, Date date, HistoricalData data){
+    private void updateLatestTop(Stock stock, TimeWindow window, LocalDate date, HistoricalData data) {
         List<MarketPeak> top = this.getPeaks(stock.getCode(), window, Peak.TOP);
         List<MarketPeak> bom = this.getPeaks(stock.getCode(), window, Peak.BOTTOM);
         double market = data.getClose();
 
         boolean max = true;
-        for ( MarketPeak p : top ){
-            if ( p.getPeak() > market ){
+        for (MarketPeak p : top) {
+            if (p.getPeak() > market) {
                 max = false;
                 break;
             }
         }
 
-        if ( max ){
-            top.get(top.size()-1).setPeak(market);
-            top.get(top.size()-1).setData(data);
+        if (max) {
+            top.get(top.size() - 1).setPeak(market);
+            top.get(top.size() - 1).setData(data);
             this.peakAnalyzeDate = date;
         }
 
         boolean min = true;
-        for ( MarketPeak p : bom ){
-            if ( p.getPeak() < market ){
+        for (MarketPeak p : bom) {
+            if (p.getPeak() < market) {
                 min = false;
                 break;
             }
         }
 
-        if ( min ){
-            bom.get(bom.size()-1).setPeak(market);
-            bom.get(bom.size()-1).setData(data);
+        if (min) {
+            bom.get(bom.size() - 1).setPeak(market);
+            bom.get(bom.size() - 1).setData(data);
             this.peakAnalyzeDate = date;
         }
     }
 
 
-    private boolean isTriggerTrade(Stock stock, TimeWindow window, TradeAction action, Date analysisDate, HistoricalData market) {
+    private boolean isTriggerTrade(Stock stock, TimeWindow window, TradeAction action, LocalDate analysisDate, HistoricalData market) {
         List<MarketPeak> top = this.getPeaks(stock.getCode(), window, Peak.TOP);
         List<MarketPeak> bom = this.getPeaks(stock.getCode(), window, Peak.BOTTOM);
 
@@ -187,11 +190,11 @@ public class TopBottomStrategy extends AbstractStrategy implements Strategy {
         if (peakMonitor == null) {
             result = detectPeakTrade(market, (trend.equals(Trend.UP) ? top : bom), trend);
             if (result.isClosePeak) {
-                peakMonitor = new PeakMonitor((trend.equals(Trend.UP) ? Peak.TOP : Peak.BOTTOM), analysisDate, result.peak, marketPrice , trend);
+                peakMonitor = new PeakMonitor((trend.equals(Trend.UP) ? Peak.TOP : Peak.BOTTOM), analysisDate, result.peak, marketPrice, trend);
             }
         } else if (comfirmPeakTrade(peakMonitor, analysisDate, marketPrice)) {
 
-            switch ( this.peakMonitor.trend ) {
+            switch (this.peakMonitor.trend) {
                 case UP:
                     action.setTradeDirection(TradeDirection.SELL);
                     break;
@@ -206,8 +209,8 @@ public class TopBottomStrategy extends AbstractStrategy implements Strategy {
 
         if (isTrigger) {
             System.out.println("CONFIRMED --------");
-            MarketPeak.printShortString(getPeaks(stock.getCode(),window, Peak.TOP));
-            MarketPeak.printShortString(getPeaks(stock.getCode(),window, Peak.BOTTOM));
+            MarketPeak.printShortString(getPeaks(stock.getCode(), window, Peak.TOP));
+            MarketPeak.printShortString(getPeaks(stock.getCode(), window, Peak.BOTTOM));
             System.out.println("\n*******************peakMonitor: " + this.peakMonitor.toString());
             peakMonitor = null;
         }
@@ -215,15 +218,15 @@ public class TopBottomStrategy extends AbstractStrategy implements Strategy {
         return isTrigger;
     }
 
-    private boolean comfirmPeakTrade(PeakMonitor peakMonitor, Date analysisDate, double market) {
-        int dayGap = DateUtils.daysBetween(peakMonitor.getMonitorDate(), analysisDate);
+    private boolean comfirmPeakTrade(PeakMonitor peakMonitor, LocalDate analysisDate, double market) {
+        long dayGap = Duration.between(peakMonitor.getMonitorDate(), analysisDate).toDays();
         if (dayGap > PEAK_CONFIRM_DATE) {
             this.peakMonitor = null;
             return false;
         }
 
         boolean isConfrimed = false;
-        this.peakMonitor.updatePeakMonitorIfRequired(analysisDate,market);
+        this.peakMonitor.updatePeakMonitorIfRequired(analysisDate, market);
         double delta = market - peakMonitor.getMarketPrice();
         double percentage = ((market - peakMonitor.getMarketPrice()) / peakMonitor.getMarketPrice()) * 100;
         switch (peakMonitor.getTrend()) {
@@ -239,15 +242,12 @@ public class TopBottomStrategy extends AbstractStrategy implements Strategy {
     }
 
 
-    private Trend getMarketTrend(String code, Date today, double market) {
+    private Trend getMarketTrend(String code, LocalDate today, double market) {
 
         Trend trend = Trend.NONE;
 
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTime(today);
-        calendar.add(Calendar.DATE, MARKET_UP_DOWN_COMPARE);
-
-        HistoricalData m = this.marketService.getMarketHistoricalData(code, TimePeriod.DAILY, calendar.getTime());
+        HistoricalData m = MarketDataRepository.getMarketDataBy(code, today.plusDays(MARKET_UP_DOWN_COMPARE));
+        //this.marketService.getMarketHistoricalData(code, TimePeriod.DAILY, today.plusDays(MARKET_UP_DOWN_COMPARE));
 
         if (m != null) {
             trend = market > m.getClose() ? Trend.UP : Trend.DOWN;
@@ -266,7 +266,7 @@ public class TopBottomStrategy extends AbstractStrategy implements Strategy {
             double delta = ((marketPrice - p.getPeak()) / p.getPeak()) * 100;
             result.setClosePeak(Math.abs(delta) <= PEAK_DELTA_PERCENTAGE);
 
-            if ( result.isClosePeak ){
+            if (result.isClosePeak) {
               /*  System.out.println(">>>>>>>>>>  Current Market " + market.getDate().toString() + " Pice: " + marketPrice + " Close To: " + p.getData().getDate().toString() + " " + p.getPeak() + " Delta: " + delta);
                 MarketPeak.printShortString(peaks);
                 System.out.println("\n>>>>>>>>>>  Current Market End " + marketPrice);*/
@@ -292,17 +292,17 @@ class PeakTradeResult {
 @AllArgsConstructor
 class PeakMonitor {
     public Peak peakType;
-    public Date monitorDate;
+    public LocalDate monitorDate;
     public double peak;
     public double marketPrice;
     public Trend trend;
 
-    private boolean isGreater(double market){
+    private boolean isGreater(double market) {
         return peakType.equals(Peak.TOP) ? market > marketPrice : market < marketPrice;
     }
 
-    public void updatePeakMonitorIfRequired(Date date, double marketPrice){
-        if ( isGreater(marketPrice) ){
+    public void updatePeakMonitorIfRequired(LocalDate date, double marketPrice) {
+        if (isGreater(marketPrice)) {
             this.monitorDate = date;
             this.marketPrice = marketPrice;
         }

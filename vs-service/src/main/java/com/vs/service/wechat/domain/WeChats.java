@@ -1,7 +1,7 @@
 package com.vs.service.wechat.domain;
 
 import com.google.common.collect.Maps;
-import com.vs.market.MarketDataDownloader;
+import com.vs.market.DownloadExecutor;
 import com.vs.service.wechat.domain.vo.MessageType;
 import com.vs.service.wechat.service.WeChatService;
 import lombok.Cleanup;
@@ -35,8 +35,6 @@ public class WeChats {
 
     @Autowired
     private WeChatService wechatService;
-    @Autowired
-    private MarketDataDownloader marketDataDownloader;
 
 
     public void processWeChatMessage(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -55,10 +53,8 @@ public class WeChats {
             resMessage = "ERROR!";
         }
         log.info(">>>>>>>>>>>>>>>>>> Return Message: " + resMessage);
-        response.getWriter().println(new String(resMessage.getBytes("utf-8"),"utf-8"));
+        response.getWriter().println(new String(resMessage.getBytes("utf-8"), "utf-8"));
     }
-
-
 
 
     private String processResponseMessage(Map map) {
@@ -83,11 +79,11 @@ public class WeChats {
         String content = map.get("Content");
         log.info("content : " + content);
 
-        if ( MKT_SYNC_UP.equals(content) ){
-            marketDataDownloader.syncMarketData();
+        if (MKT_SYNC_UP.equals(content)) {
+            DownloadExecutor.downloadAll();
 
             return "sync-up market successfully.";
-        }else{
+        } else {
             String resMessage = this.wechatService.processUserAction(content);
 
             //log.info("WeChat Response XML: " + resMessage);

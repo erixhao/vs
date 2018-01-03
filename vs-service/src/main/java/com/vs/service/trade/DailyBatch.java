@@ -7,10 +7,7 @@ import com.vs.common.domain.Transaction;
 import com.vs.common.domain.enums.BullBear;
 import com.vs.common.domain.enums.TimePeriod;
 import com.vs.common.domain.vo.TimeWindow;
-import com.vs.common.utils.BeanContext;
-import com.vs.common.utils.Constants;
-import com.vs.common.utils.PerformanceUtils;
-import com.vs.common.utils.PropertieUtils;
+import com.vs.common.utils.*;
 import com.vs.market.MarketService;
 import com.vs.strategy.analysis.MarketMovementAnalyze;
 import com.vs.strategy.common.MarketTrendAnalyze;
@@ -20,12 +17,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.text.DecimalFormat;
+import java.time.LocalDate;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
-import static com.vs.common.domain.HistoricalData.toMarketDate;
 
 
 /**
@@ -70,7 +67,7 @@ public class DailyBatch {
         calendar.setTime(today);
         calendar.add(Calendar.DAY_OF_MONTH, -30*1);
         // report all T-7 to T trade trans
-        Date reportWindow = calendar.getTime();
+        LocalDate reportWindow = LocalDate.now();
 
         //TimeWindow tradWindow = new TimeWindow(toMarketDate("2016-04-26"),today,TimePeriod.DAILY);
         //TimeWindow tradWindow = new TimeWindow(toMarketDate("2017-01-01"),today,TimePeriod.DAILY);
@@ -81,7 +78,7 @@ public class DailyBatch {
 
         List<Transaction> todayTrans = Lists.newArrayList();
         List<String> codes = PropertieUtils.getStockCodeList();
-        this.marketService.updateMarketData(codes,MKT_DAYS);
+//TODO need confirm //        this.marketService.updateMarketData(codes,MKT_DAYS);
 
         long begin = PerformanceUtils.beginTime("autoTrade");
         List<TradingBook> result = this.traderService.autoTrade(tradWindow, capital,false);
@@ -92,7 +89,7 @@ public class DailyBatch {
         for (TradingBook tradingBook : result) {
             List<Transaction> trans = tradingBook.getTradedTransactions();
             for (Transaction tran : trans) {
-                if (tran.getDate().after(reportWindow)) {
+                if (tran.getDate().isAfter(reportWindow)) {
                     todayTrans.add(tran);
                 }
             }
@@ -120,7 +117,7 @@ public class DailyBatch {
         for (Transaction t : trans) {
             BullBear trend = this.marketTrendAnalyze.analysisTrend(t.getStock().getCode(), t.getDate());
 
-            System.out.println(String.format(DETAIL_STR, toMarketDate(t.getDate()), t.getStock().getCode(), t.getDirection(), format.format(t.getPrice()),
+            System.out.println(String.format(DETAIL_STR, DateUtils.toString(t.getDate()), t.getStock().getCode(), t.getDirection(), format.format(t.getPrice()),
                     t.getPositions(),format.format(t.getCurrentTradePnL().getCurrProfitPercentage()) + "%",
                     format.format(t.getCurrentTradePnL().getTotalProfitPercentage()) + "%",
                     trend.toString()
@@ -152,7 +149,7 @@ public class DailyBatch {
 
             PnL p = t.getPnL();
             MarketBase np = this.marketMoveAnalyze.calcuate(t.getStock().getCode(),window);
-            System.out.println(String.format(DETAIL_STR, t.getStock().getCode(), f.format(p.getTotalProfitPercentage()) + "%",f.format(p.getCurrProfitPercentage()) + "%",  f.format(p.getProfit()) , t.getMarkToMarket().getMarketPrice(), t.getPositions(), t.getTransactions().size(), "(" + toMarketDate(np.getBeginDate()) + "-" + toMarketDate(np.getEndDate()) + ")", "[" + np.getBeginPrice() + " - " + np.getEndPrice() + "]", f.format(np.getProfitPercentage()) + "%"));
+            System.out.println(String.format(DETAIL_STR, t.getStock().getCode(), f.format(p.getTotalProfitPercentage()) + "%",f.format(p.getCurrProfitPercentage()) + "%",  f.format(p.getProfit()) , t.getMarkToMarket().getMarketPrice(), t.getPositions(), t.getTransactions().size(), "(" + DateUtils.toString(np.getBeginDate()) + "-" + DateUtils.toString(np.getEndDate()) + ")", "[" + np.getBeginPrice() + " - " + np.getEndPrice() + "]", f.format(np.getProfitPercentage()) + "%"));
         }
         System.out.println("---------------------------------------------------------------");
         System.out.println(" >>>>>>>>>>>>>> >>>>>>>>>>>>>>   Trade >>>>>>>>>>>>>> >>>>>>>>>>>>>>");

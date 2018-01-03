@@ -14,6 +14,7 @@ import com.vs.strategy.domain.MarketContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDate;
 import java.util.Date;
 import java.util.List;
 
@@ -44,7 +45,7 @@ public class HighLowMoveStrategy extends AbstractStrategy implements Strategy {
         List<TradeAction> result = Lists.newArrayList();
 
         Stock stock = context.getStock();
-        Date date = context.getAnalysisDate();
+        LocalDate date = context.getAnalysisDate();
 
         HistoricalData d0 = this.getMarketDataT(context);
         HistoricalData p1 = this.getMarketDataT(context, -1);

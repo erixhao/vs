@@ -6,12 +6,14 @@ import com.vs.common.domain.enums.Strategies;
 import com.vs.common.domain.enums.TimePeriod;
 import com.vs.common.domain.enums.TradeDirection;
 import com.vs.common.utils.MarketDataUtils;
+import com.vs.repository.MarketDataRepository;
 import com.vs.strategy.AbstractStrategy;
 import com.vs.strategy.Strategy;
 import com.vs.strategy.domain.MarketContext;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDate;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -35,29 +37,29 @@ public class KeepTransactionProfitStrategy extends AbstractStrategy implements S
     }
 
     @Override
-    public List<TradeAction> execute(MarketContext context){
+    public List<TradeAction> execute(MarketContext context) {
         List<TradeAction> result = Lists.newArrayList();
 
         Stock stock = context.getStock();
-        Date date = context.getAnalysisDate();
+        LocalDate date = context.getAnalysisDate();
         TradingBook tradingBook = context.getTradingBook();
 
-        if ( tradingBook.getPositions() == 0 )
+        if (tradingBook.getPositions() == 0)
             return result;
 
 
         List<Transaction> transactions = tradingBook.getTransactions();
 
-        for ( Transaction trans : transactions ){
+        for (Transaction trans : transactions) {
 
-            if ( trans.getDate().after(date) || !trans.getDirection().equals(TradeDirection.BUY) || trans.isClosed() ){
+            if (trans.getDate().isAfter(date) || !trans.getDirection().equals(TradeDirection.BUY) || trans.isClosed()) {
                 continue;
             }
 
 
-            if ( triggerKeepProfit(stock, date, trans) ) {
+            if (triggerKeepProfit(stock, date, trans)) {
                 //log.info("++++++++  triggerKeepProfit : " + trans.toString());
-                TradeAction action = new TradeAction(Strategies.KeepTransactionProfitStrategy,TradeDirection.SELL,stock,date,date);
+                TradeAction action = new TradeAction(Strategies.KeepTransactionProfitStrategy, TradeDirection.SELL, stock, date, date);
 
                 action.setTradeDate(date);
                 action.setTradePrice(context.getMarketPrice());
@@ -72,51 +74,50 @@ public class KeepTransactionProfitStrategy extends AbstractStrategy implements S
         return result;
     }
 
-    private boolean triggerKeepProfit(Stock stock, Date date, Transaction trans){
+    private boolean triggerKeepProfit(Stock stock, LocalDate date, Transaction trans) {
 
-        if ( trans.isClosed() || trans.getDate().equals(date) || trans.getPositions() <= 0)
+        if (trans.isClosed() || trans.getDate().equals(date) || trans.getPositions() <= 0)
             return false;
 
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTime(trans.getDate());
-        calendar.add(Calendar.DATE, 1); // T + 1
+        LocalDate cur = trans.getDate().plusDays(1);
 
-        Date end = date;
+        LocalDate end = date;
         boolean maxProfitFlag = false;
         boolean minProfitFlag = false;
 
-        while ( calendar.getTime().before(end) || calendar.getTime().equals(end) ) {
-            Date marketDate = calendar.getTime();
-            HistoricalData market = this.marketService.getMarketHistoricalData(stock.getCode(), TimePeriod.DAILY, marketDate);
+        while (cur.isBefore(end) || cur.equals(end)) {
+            LocalDate marketDate = cur;
+            HistoricalData market = MarketDataRepository.getMarketDataBy(stock.getCode(), marketDate);
 
-            if (!MarketDataUtils.isTradingDate(market)) {
-                calendar.add(Calendar.DATE, 1);
+            if (!MarketDataUtils.isTradingDate(market.getDate())) {
+                cur = cur.plusDays(1);
                 continue;
             }
 
             double maxProfit = trans.getProfitPercentage(market.getHigh());
 
-            if ( maxProfit >= MAX_PROFIT_RAIO && !maxProfitFlag ){
+            if (maxProfit >= MAX_PROFIT_RAIO && !maxProfitFlag) {
                 maxProfitFlag = true;
-            }else if ( maxProfit >= PROFIT_RAIO && !minProfitFlag ){
+            } else if (maxProfit >= PROFIT_RAIO && !minProfitFlag) {
                 minProfitFlag = true;
             }
 
 
-            if ( maxProfitFlag || minProfitFlag ){
-                market = this.marketService.getMarketHistoricalData(stock.getCode(), TimePeriod.DAILY, date);
+            if (maxProfitFlag || minProfitFlag) {
+                market = MarketDataRepository.getMarketDataBy(stock.getCode(), date);
+                //this.marketService.getMarketHistoricalData(stock.getCode(), TimePeriod.DAILY, date);
                 double minProfit = trans.getProfitPercentage(market.getLow());
 
-                if ( maxProfitFlag && ( minProfit > 0 && minProfit <= MAX_KEEP_PROFIT_RAIO) ){
+                if (maxProfitFlag && (minProfit > 0 && minProfit <= MAX_KEEP_PROFIT_RAIO)) {
                     return true;
-                }else if ( minProfitFlag && (minProfit > 0 && minProfit <= KEEP_PROFIT_RAIO) ){
+                } else if (minProfitFlag && (minProfit > 0 && minProfit <= KEEP_PROFIT_RAIO)) {
                     return true;
-                }else{
+                } else {
                     return false;
                 }
             }
 
-            calendar.add(Calendar.DATE, 1);
+            cur = cur.plusDays(1);
         }
 
         return false;

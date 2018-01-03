@@ -18,6 +18,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDate;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -61,7 +62,7 @@ public class PercentageStrategy extends AbstractStrategy implements Strategy {
         return Strategies.PercentageStrategy.toString();
     }
 
-    public Strategy init(Stock stock, TimeWindow window, Date date){
+    public Strategy init(Stock stock, TimeWindow window, LocalDate date){
 
         List<PeakStrategy> currentPeaks = getPeaks(stock.getCode(), window);
         if ( currentPeaks == null || currentPeaks.size() == 0  ){
@@ -77,13 +78,13 @@ public class PercentageStrategy extends AbstractStrategy implements Strategy {
         List<TradeAction> result = Lists.newArrayList();
 
         Stock stock = context.getStock();
-        Date date = context.getAnalysisDate();
+        LocalDate date = context.getAnalysisDate();
         TradingBook tradingBook = context.getTradingBook();
         TimeWindow window = context.getTimeWindow();
 
         HistoricalData market = this.getCurrentMarket(stock.getCode(),date);
         List<Double> top = PeakStrategy.toPeaks(getPeaks(stock.getCode(), window));
-        Date today = date;
+        LocalDate today = date;
 
         this.init(stock, window, date);
 

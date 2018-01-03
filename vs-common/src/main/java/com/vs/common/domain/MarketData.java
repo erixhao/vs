@@ -1,24 +1,37 @@
 package com.vs.common.domain;
 
-import com.vs.common.utils.DateUtils;
+import com.vs.common.domain.annotation.MapInfo;
 import lombok.Data;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.Serializable;
-import java.util.Date;
+import java.time.LocalDate;
+import java.util.Objects;
 
 @Data
-public abstract class MarketData extends Stock implements Comparable<MarketData>, Serializable {
-    protected long id;
-    protected Date date;
+public abstract class MarketData extends Entity implements Comparable<MarketData>, Serializable {
+    @MapInfo(name = "stockCode", position = 0)
+    protected String stockCode;
+    @MapInfo(name = "date", position = 1)
+    protected LocalDate date;
+    @MapInfo(name = "yesterdayClose", position = 9)
     protected double yesterdayClose;
+    @MapInfo(name = "open", position = 2)
     protected double open;
+    @MapInfo(name = "close", position = 4)
     protected double close;
+    @MapInfo(name = "high", position = 3)
     protected double high;
+    @MapInfo(name = "low", position = 5)
     protected double low;
+    @MapInfo(name = "adjClose", position = 8)
     protected double adjClose;
+    @MapInfo(name = "volume", position = 6)
     protected long volume;
+    @MapInfo(name = "volumeAmount", position = 7)
     protected double volumeAmount;
-    protected Date updateDate;
+    //    @MapInfo(name = "updateDate", position = 10)
+    protected LocalDate updateDate;
 
     public double getPercentage() {
         if (this.yesterdayClose == 0)
@@ -35,11 +48,6 @@ public abstract class MarketData extends Stock implements Comparable<MarketData>
         return close < open;
     }
 
-    public String timeZoneDate() {
-        return DateUtils.withTimeZoneFormat(date);
-    }
-
-
     protected void clear() {
         this.open = 0;
         this.close = 0;
@@ -49,10 +57,25 @@ public abstract class MarketData extends Stock implements Comparable<MarketData>
         this.yesterdayClose = 0;
     }
 
-    @Override
-    public int compareTo(MarketData o) {
-        return this.date.compareTo(o.getDate());
+    public String getKey() {
+        return this.stockCode + "_" + this.date;
     }
 
+    public int compareTo(@NotNull MarketData o) {
+        return this.getKey().compareTo(o.getKey());
+    }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof MarketData)) return false;
+        if (!super.equals(o)) return false;
+        MarketData that = (MarketData) o;
+        return Objects.equals(getKey(), that.getKey());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), getKey());
+    }
 }

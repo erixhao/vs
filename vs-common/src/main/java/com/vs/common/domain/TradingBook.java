@@ -43,7 +43,7 @@ public class TradingBook extends AbstractBook implements Comparable<TradingBook>
 
         String DETAIL_STR = "|%7s|%10s|Strategy:%23s|%5s|Positions:%6s|Cost:%10s|Price:%7s|Capital:%10s|";
         if ( positions > 0 && validate(tran) ) {
-            log.info("---- Make Transaction :" + String.format(DETAIL_STR,action.getStock().getCode(), HistoricalData.toMarketDate(action.getTradeDate()),action.getStrategy(),action.getTradeDirection().toString(),positions,f.format(action.getTradePrice() * positions),f.format(action.getTradePrice()),f.format(this.markToMarket.getAvailCapital())));
+            log.info("---- Make Transaction :" + String.format(DETAIL_STR,action.getStock().getCode(), action.getTradeDate(),action.getStrategy(),action.getTradeDirection().toString(),positions,f.format(action.getTradePrice() * positions),f.format(action.getTradePrice()),f.format(this.markToMarket.getAvailCapital())));
 
             this.markToMarket.setPyramidPosition(p);
             this.book(tran, false);

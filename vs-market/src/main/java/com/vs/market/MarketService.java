@@ -7,14 +7,16 @@ import com.vs.common.domain.enums.TimePeriod;
 import com.vs.common.utils.BeanContext;
 import com.vs.common.utils.DateUtils;
 import com.vs.common.utils.MarketDataUtils;
-import com.vs.dao.MarketDataDAO;
+import com.vs.dao.utility.DataAccessService;
+import com.vs.http.analyzer.SinaHistoryAnalyzer;
+import com.vs.repository.MarketDataRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.Calendar;
-import java.util.Date;
+import java.time.LocalDate;
 import java.util.List;
+import java.util.function.Predicate;
 
 /**
  * Created by erix-mac on 16/1/14.
@@ -23,119 +25,19 @@ import java.util.List;
 @Slf4j
 public class MarketService {
 
-    @Autowired
-    private MarketDataDAO marketDataDAO;
-    @Autowired
-    private SinaMarketDataProvider sinaMarketDataProvider;
-
-    @Autowired
-    private YahooMarketDataProvider yahooMarketDataProvider;
-    @Autowired
-    private MarketDataService marketDataService;
-
-
     public boolean hasMarketData(String code) {
-        return this.marketDataDAO.getMarketCount(code) > 0;
+        return MarketDataRepository.getMarketCount(code) > 0;
     }
 
-    public void updateMarketData(List<String> codes, int lastDays){
-        for ( String s : codes ){
-            this.updateMarketData(s, lastDays);
+    public void updateMarketData(List<String> codes, LocalDate date) {
+        for (String s : codes) {
+            this.updateMarketData(s, date);
         }
     }
 
-    public void updateMarketData(String code, int lastDays) {
-        if ( !Stock.isValidStockCode(code) )
-            return;
-
-        List mkt = this.marketDataService.getMarketHistoricalData(code, TimePeriod.DAILY);
-        boolean isNotInCache = mkt == null || mkt.size() == 0;
-
-        if ( hasLatestMarketData(code) ) {
-            if ( isNotInCache ){
-                this.marketDataService.refreshMarketDataCache(code);
-            }
-
-            return;
+    public void updateMarketData(String code, LocalDate date) {
+        while (MarketDataRepository.getMarketCount(code, date) <= 0) {
+            DownloadTask.downloadHistoryDataTask(code, date);
         }
-
-        boolean hasMarket = this.hasMarketData(code);
-        int updateCount = 0;
-
-        if (hasMarket) {
-            log.info(">>>>>>>> updateMarketDataIncremental :  " + code);
-            updateCount = this.updateMarketDataIncremental(code);
-        } else {
-            log.info(">>>>>>>> insertAllMarketData :  " + code);
-            updateCount = this.insertAllMarketData(code, lastDays);
-        }
-
-        if ( updateCount > 0 ){
-            this.marketDataService.refreshMarketDataCache(code);
-        }
-
-        if ( isNotInCache ){
-            this.marketDataService.refreshMarketDataCache(code);
-        }
-
-        log.info("updateMarketData : " + code + " successfully with count: " +  updateCount + ".");
-    }
-
-    public List<String> getAllExistingCodes() {
-        return this.marketDataDAO.getAllExistingCodes();
-    }
-
-    private boolean hasLatestMarketData(String code) {
-        Date now = DateUtils.timeZoneDate(Calendar.getInstance().getTime());
-
-        Date tradeDate = MarketDataUtils.isTradingDate(now) ? now : DateUtils.timeZoneDate(MarketDataUtils.getPreTradeDate());
-        return this.marketDataDAO.getMarketCount(code, HistoricalData.toMarketDate(tradeDate)) > 0;
-
-
-    }
-
-    private int insertAllMarketData(String code, int lastDays) {
-        List<HistoricalData> mktData;
-
-        if ( lastDays != -1 ){
-            mktData = this.sinaMarketDataProvider.getMarketDataIncremental(code, DateUtils.getLastDate(lastDays));
-        }else {
-            mktData = this.sinaMarketDataProvider.getMarketData(code);
-        }
-
-        this.marketDataDAO.insert(mktData);
-        return mktData.size();
-    }
-
-    private int updateMarketDataIncremental(String code) {
-        Date currMarketDate = this.marketDataDAO.getLatestMarketData(code).getDate();
-        List<HistoricalData> mktData = this.sinaMarketDataProvider.getMarketDataIncremental(code, currMarketDate);
-        List<HistoricalData> incremental = Lists.newArrayList();
-
-        if ( mktData == null || mktData.size() == 0 )
-            return 0;
-
-        for (HistoricalData d : mktData) {
-            if (d.getDate().after(currMarketDate)) {
-                incremental.add(d);
-            }
-        }
-
-        if ( incremental.size() == 0 ){
-           // no need to insert to db
-        }else{
-            this.marketDataDAO.insert(incremental);
-        }
-
-        return incremental.size();
-    }
-
-    public static void main(String[] args) {
-        MarketService marketService = BeanContext.getBean(MarketService.class);
-
-        //marketService.updateMarketData("300372");
-        System.out.println(marketService.hasLatestMarketData("000980"));
-
-
     }
 }

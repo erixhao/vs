@@ -8,6 +8,7 @@ import com.vs.service.wechat.domain.vo.TradeResult;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.Date;
 import java.util.Map;
 import java.util.Random;
@@ -36,27 +37,27 @@ public class TradeCacheService{
     }
 
     public void put(String code, TradeResult result){
-        final  Date date = result.getTradeDate();
+        final  LocalDate date = result.getTradeDate();
 
         if ( isCached(code,date) )
             return;
 
-        Date tradingDate = date;
+        LocalDate tradingDate = date;
         if ( !MarketDataUtils.isTradingDate(date) ){
             tradingDate = MarketDataUtils.getNextTradeDate(date);
         }
         TRADE_CACHE.put(code,new TradeResult(result.isTradeSingal(), result.isBuySingal(), tradingDate,result.getResponse(), result.getProfit()));
     }
 
-    public boolean isCached(String code, Date date){
-        Date tradingDate = DateUtils.toMarketDate(DateUtils.withTimeZoneFormat(date));
+    public boolean isCached(String code, LocalDate date){
+        LocalDate tradingDate = date;
 
         if ( !MarketDataUtils.isTradingDate(tradingDate) ){
             tradingDate = MarketDataUtils.getNextTradeDate(tradingDate);
         }
 
         TradeResult r = this.get(code);
-        return r != null && DateUtils.toMarketDate(r.getTradeDate()).equalsIgnoreCase(DateUtils.toMarketDate(tradingDate));
+        return r != null && DateUtils.toString(r.getTradeDate()).equalsIgnoreCase(DateUtils.toString(tradingDate));
     }
 
     public Map<String,TradeResult> randomTradeCache(int num, CacheSignal cacheSignal){

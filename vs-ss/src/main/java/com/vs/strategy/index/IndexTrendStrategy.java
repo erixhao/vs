@@ -12,6 +12,7 @@ import lombok.Getter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDate;
 import java.util.Date;
 import java.util.Map;
 
@@ -25,44 +26,45 @@ public class IndexTrendStrategy {
     @Getter
     private MarketTrendAnalyze marketTrendAnalyze;
 
-    public IndexTrendStrategy(){
+    public IndexTrendStrategy() {
     }
 
 
-    public BullBear analysisTrend(final Date date){
-        return marketTrendAnalyze.analysisTrend(MarketIndexs.ShanghaiCompositeIndex.getSinaCode(),date);
+    public BullBear analysisTrend(final LocalDate date) {
+        return marketTrendAnalyze.analysisTrend(MarketIndexs.ShanghaiCompositeIndex.getSinaCode(), date);
     }
 
-    public BullBear analysisTimeWindowTrend(final Date date, TimeWindow window){
-        return marketTrendAnalyze.analysisTimeWindowTrend(MarketIndexs.ShanghaiCompositeIndex.getSinaCode(),date, window);
+    public BullBear analysisTimeWindowTrend(final LocalDate date, TimeWindow window) {
+        return marketTrendAnalyze.analysisTimeWindowTrend(MarketIndexs.ShanghaiCompositeIndex.getSinaCode(), date, window);
     }
 
-    public Map<MarketIndexs,BullBear> analysisAllIndex(final Date date){
+    public Map<MarketIndexs, BullBear> analysisAllIndex(final LocalDate date) {
 
-        Map<MarketIndexs,BullBear> map = Maps.newConcurrentMap();
+        Map<MarketIndexs, BullBear> map = Maps.newConcurrentMap();
 
-        BullBear shIndex = marketTrendAnalyze.analysisTrend(MarketIndexs.ShanghaiCompositeIndex.getSinaCode(),date);
-        BullBear szIndex = marketTrendAnalyze.analysisTrend(MarketIndexs.ShenzhenComponentIndex.getSinaCode(),date);
-        BullBear geIndex = marketTrendAnalyze.analysisTrend(MarketIndexs.GrowthEnterpriseIndex.getSinaCode(),date);
+        BullBear shIndex = marketTrendAnalyze.analysisTrend(MarketIndexs.ShanghaiCompositeIndex.getSinaCode(), date);
+        BullBear szIndex = marketTrendAnalyze.analysisTrend(MarketIndexs.ShenzhenComponentIndex.getSinaCode(), date);
+        BullBear geIndex = marketTrendAnalyze.analysisTrend(MarketIndexs.GrowthEnterpriseIndex.getSinaCode(), date);
 
-        map.put(MarketIndexs.ShanghaiCompositeIndex,shIndex);
-        map.put(MarketIndexs.ShenzhenComponentIndex,szIndex);
-        map.put(MarketIndexs.GrowthEnterpriseIndex,geIndex);
+        map.put(MarketIndexs.ShanghaiCompositeIndex, shIndex);
+        map.put(MarketIndexs.ShenzhenComponentIndex, szIndex);
+        map.put(MarketIndexs.GrowthEnterpriseIndex, geIndex);
 
         return map;
     }
 
-    public String marketRegression(String code, Date begin, Date end, TimePeriod period){
+    public String marketRegression(String code, LocalDate begin, LocalDate end, TimePeriod period) {
         return this.marketTrendAnalyze.marketTrendRegression(code, begin, end, period);
     }
 
 
-
-    public static void main(String[] args){
+    public static void main(String[] args) {
         IndexTrendStrategy strategy = BeanContext.getBean(IndexTrendStrategy.class);
 
-        Date beginDate = DateUtils.toMarketDate("2017-05-01");
-        Date endDate = DateUtils.toMarketDate("2017-06-08");
+//        Date beginDate = DateUtils.toMarketDate("2017-05-01");
+//        Date endDate = DateUtils.toMarketDate("2017-06-08");
+        LocalDate beginDate = LocalDate.of(2017, 5, 1);
+        LocalDate endDate = LocalDate.of(2017, 6, 8);
 
         //strategy.getMarketTrendAnalyze().marketTrendRegression(StockIndex.ShanghaiCompositeIndex.getSinaCode(), beginDate, endDate, TimePeriod.WEEKLY);
         //strategy.getMarketTrendAnalyze().marketTrendRegression(StockIndex.ShenzhenComponentIndex.getSinaCode(), beginDate, endDate, TimePeriod.WEEKLY);

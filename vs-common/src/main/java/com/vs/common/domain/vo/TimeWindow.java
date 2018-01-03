@@ -1,14 +1,14 @@
 package com.vs.common.domain.vo;
 
 
-import com.vs.common.domain.HistoricalData;
 import com.vs.common.domain.enums.TimePeriod;
+import com.vs.common.utils.DateUtils;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.cglib.core.Local;
 
-import java.util.Calendar;
-import java.util.Date;
+import java.time.LocalDate;
 
 
 /**
@@ -19,69 +19,58 @@ import java.util.Date;
 @AllArgsConstructor
 public class TimeWindow {
 
-    private Date begin;
-    private Date end;
+    private LocalDate begin;
+    private LocalDate end;
     private TimePeriod period;
 
     @Override
     public String toString() {
         return "TimeWindow{" +
-                "begin=" + HistoricalData.toMarketDate(begin) +
-                ", end=" + HistoricalData.toMarketDate(end) +
+                "begin=" + begin +
+                ", end=" + end +
                 ", period=" + period +
                 '}';
     }
 
 
-    public String toKeyString(){
+    public String toKeyString() {
         return
-                HistoricalData.toMarketDate(begin) +
-                "_" + HistoricalData.toMarketDate(end)
-               ;
+                DateUtils.toString(begin) +
+                        "_" + DateUtils.toString(end)
+                ;
     }
 
     public String toShortString() {
         return "{" +
-                HistoricalData.toMarketDate(begin) +
-                " to " + HistoricalData.toMarketDate(end) +
+                DateUtils.toString(begin) +
+                " to " + DateUtils.toString(end) +
                 '}';
     }
 
     public String toWeChatString() {
         return "{" +
-                HistoricalData.toMarketYYYYMMDDDate(begin) +
-                "-" + HistoricalData.toMarketYYYYMMDDDate(end) +
+                DateUtils.toString(begin) +
+                "-" + DateUtils.toString(end) +
                 '}';
     }
 
-    public static TimeWindow getTimeWindow(Date begin, Date end){
-        return new TimeWindow(begin,end,TimePeriod.DAILY);
+    public static TimeWindow getTimeWindow(LocalDate begin, LocalDate end) {
+        return new TimeWindow(begin, end, TimePeriod.DAILY);
     }
 
     public static TimeWindow getLastYear(TimePeriod period) {
-        return getTimeWindow(period,Calendar.getInstance().getTime(),-1,0,0);
+        return getTimeWindow(period, LocalDate.now(), -1, 0, 0);
     }
 
     public static TimeWindow getLastMonth(TimePeriod period) {
-        return getTimeWindow(period,Calendar.getInstance().getTime(),0,-1,0);
+        return getTimeWindow(period, LocalDate.now(), 0, -1, 0);
     }
 
     public static TimeWindow getLastMonths(TimePeriod period, int months) {
-        return getTimeWindow(period,Calendar.getInstance().getTime(),0,months,0);
+        return getTimeWindow(period, LocalDate.now(), 0, months, 0);
     }
 
-    public static TimeWindow getTimeWindow(TimePeriod period, Date end, int year, int month, int day) {
-
-        TimeWindow window = new TimeWindow();
-
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTime(end);
-
-        calendar.add(Calendar.YEAR, year);
-        calendar.add(Calendar.MONTH, month);
-        calendar.add(Calendar.DAY_OF_YEAR, day);
-
-
-        return new TimeWindow(calendar.getTime(),end,period);
+    public static TimeWindow getTimeWindow(TimePeriod period, LocalDate end, int year, int month, int day) {
+        return new TimeWindow(LocalDate.of(year, month, day), end, period);
     }
 }

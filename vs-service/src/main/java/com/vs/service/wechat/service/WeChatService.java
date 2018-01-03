@@ -24,6 +24,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -53,11 +54,11 @@ public class WeChatService {
 
     public String processUserAction(String action) {
         WeChatAction weChatAction = WeChatAction.parseUserAction(action.trim().toUpperCase());
-        final Date date = new Date();
-        TradeResult result = new TradeResult(false, false, date, weChatAction.toString() + " N/A",-1);
+        final LocalDate date = LocalDate.now();
+        TradeResult result = new TradeResult(false, false, date, weChatAction.toString() + " N/A", -1);
         String key = action;
 
-        if (tradeCacheService.isCached(key, new Date())) {
+        if (tradeCacheService.isCached(key, LocalDate.now())) {
             return tradeCacheService.get(key).getResponse();
         }
 
@@ -86,7 +87,7 @@ public class WeChatService {
             case REGRESSION:
                 break;
             case INVALID:
-                result = new TradeResult(false, false, date, WeChatResponse.generateInvalidInput(),-1);
+                result = new TradeResult(false, false, date, WeChatResponse.generateInvalidInput(), -1);
                 break;
         }
 
@@ -99,17 +100,17 @@ public class WeChatService {
         Map<String, TradeResult> random = this.tradeCacheService.randomTradeCache(5, CacheSignal.BUY);
         String suggestion = WeChatResponse.generateSmartSuggestion(random);
 
-        return new TradeResult(true,false,new Date(),suggestion, -1);
+        return new TradeResult(true, false, LocalDate.now(), suggestion, -1);
     }
 
 
     private TradeResult processStockAction(String code) {
-        Date reportWindow = DateUtils.nextMonths(TRADING_MONTHS);
+        LocalDate reportWindow = DateUtils.nextMonths(TRADING_MONTHS);
         TimeWindow tradWindow = TimeWindow.getLastMonths(TimePeriod.DAILY, TRADING_MONTHS);
         System.out.println(tradWindow.toShortString());
 
         long p1 = PerformanceUtils.beginTime("updateData");
-        this.marketService.updateMarketData(code, MKT_DAYS);
+//TODO need confirm by Erix//        this.marketService.updateMarketData(code, MKT_DAYS);
 
         long p2 = PerformanceUtils.endTime("updateData", p1);
 
@@ -119,8 +120,8 @@ public class WeChatService {
 
         long p3 = PerformanceUtils.endTime("autoTrade", p2);
 
-        BullBear trend = this.marketTrendAnalyze.analysisTrend(code, new Date());
-        Map<MarketIndexs, BullBear> idxTrend = this.indexTrendStrategy.analysisAllIndex(new Date());
+        BullBear trend = this.marketTrendAnalyze.analysisTrend(code, LocalDate.now());
+        Map<MarketIndexs, BullBear> idxTrend = this.indexTrendStrategy.analysisAllIndex(LocalDate.now());
         Map<String, TradeResult> randomTrade = this.tradeCacheService.randomTradeCache(3, CacheSignal.TRADE);
         Map<String, TradeResult> randomProfit = this.tradeCacheService.randomTradeCache(5, CacheSignal.GREAT_PROFIT);
 
@@ -131,9 +132,9 @@ public class WeChatService {
 
     private TradeResult processTrendAction(String code) {
         TimeWindow window = TimeWindow.getLastMonths(TimePeriod.DAILY, TRADING_MONTHS);
-        this.marketService.updateMarketData(code, MKT_DAYS);
-        return new TradeResult(true, false, new Date(),
-                this.marketTrendAnalyze.marketTrendRegression(code, window.getBegin(), window.getEnd(), TimePeriod.MONTHLY),-1
+//TODO need confirm by Erix//        this.marketService.updateMarketData(code, MKT_DAYS);
+        return new TradeResult(true, false, LocalDate.now(),
+                this.marketTrendAnalyze.marketTrendRegression(code, window.getBegin(), window.getEnd(), TimePeriod.MONTHLY), -1
         );
     }
 
