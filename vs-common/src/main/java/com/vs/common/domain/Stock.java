@@ -51,4 +51,9 @@ public class Stock extends Entity {
             return code.matches("[0-9]{6}") && PRE_SHANGHAI_SHENZHENG.contains(code.substring(0, 3));
         }
     }
+
+    @Override
+    public String getKey() {
+        return this.getCode();
+    }
 }

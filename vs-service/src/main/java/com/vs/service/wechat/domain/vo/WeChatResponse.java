@@ -15,6 +15,7 @@ import com.vs.common.utils.PropertieUtils;
 import lombok.Data;
 
 import java.text.DecimalFormat;
+import java.time.LocalDate;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -64,7 +65,7 @@ public class WeChatResponse {
                 .append(randomProfit.size() > 0 ? greatProfit + "\n" : "")
                 .append(version);
 
-        return new TradeResult(isSignal, isBuySignal, new Date(), sb.toString(), profit);
+        return new TradeResult(isSignal, isBuySignal, LocalDate.now(), sb.toString(), profit);
     }
 
 
@@ -143,10 +144,10 @@ public class WeChatResponse {
         return sb.toString();
     }
 
-    private static List<Transaction> extractLatestTradeTransaction(List<Transaction> trans, Date latestDay) {
+    private static List<Transaction> extractLatestTradeTransaction(List<Transaction> trans, LocalDate latestDay) {
         List<Transaction> latestTrans = Lists.newArrayList();
         for (Transaction t : trans) {
-            if (t.getDate().after(latestDay)) {
+            if (t.getDate().isAfter(latestDay)) {
                 latestTrans.add(t);
             }
         }
@@ -174,7 +175,7 @@ public class WeChatResponse {
         DecimalFormat format = new DecimalFormat("0.00");
         for (Transaction t : latestTrans) {
             sb.append("\n");
-            sb.append(String.format(DETAIL_STR, HistoricalData.toMarketShortDate(t.getDate()), t.getDirection().getDesc(), format.format(t.getPrice())));
+            sb.append(String.format(DETAIL_STR, DateUtils.toString(t.getDate()), t.getDirection().getDesc(), format.format(t.getPrice())));
         }
         sb.append("\n-------------------------");
 
@@ -200,7 +201,7 @@ public class WeChatResponse {
             if (t.getPositions() <= 0)
                 continue;
             sb.append("\n");
-            sb.append(String.format(DETAIL_STR, HistoricalData.toMarketShortDate(t.getDate()), t.getDirection().getDesc(), format1.format(t.getPrice()), format.format(t.getCurrentTradePnL().getCurrProfitPercentage()) + "%", format.format(t.getCurrentTradePnL().getTotalProfitPercentage()) + "%"));
+            sb.append(String.format(DETAIL_STR, DateUtils.toString(t.getDate()), t.getDirection().getDesc(), format1.format(t.getPrice()), format.format(t.getCurrentTradePnL().getCurrProfitPercentage()) + "%", format.format(t.getCurrentTradePnL().getTotalProfitPercentage()) + "%"));
         }
         sb.append("\n").append(LINE);
 

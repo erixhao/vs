@@ -10,6 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -24,20 +25,20 @@ public class PoolSelectionBatch {
     @Autowired
     private MarketTrendAnalyze marketTrendAnalyze;
 
-    public void selectBatch(){
+    public void selectBatch() {
 
-        Date today = Calendar.getInstance().getTime();
+        LocalDate today = LocalDate.now();
         List<Stock> stocksList = PropertieUtils.getStockList();
 
-        for (Stock s : stocksList){
+        for (Stock s : stocksList) {
             BullBear t = this.marketTrendAnalyze.analysisTrend(s.getCode(), today);
             //t.printMarketTrend(t, today, s.getCode());
-            if ( t.isBull() )
+            if (t.isBull())
                 System.out.print(s.getCode() + ",");
         }
     }
 
-    public static void main(String[] args ){
+    public static void main(String[] args) {
         log.info("Daily PoolSelectionBatch Starting....\n");
 
         PoolSelectionBatch selectionBatch = BeanContext.getBean(PoolSelectionBatch.class);

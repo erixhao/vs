@@ -6,11 +6,13 @@ import com.vs.common.domain.*;
 import com.vs.common.domain.vo.TimeWindow;
 import com.vs.common.utils.BeanContext;
 import com.vs.common.utils.DataFormatUtil;
+import com.vs.common.utils.DateUtils;
 import com.vs.strategy.analysis.MarketMovementAnalyze;
 import com.vs.strategy.domain.MarketBase;
 import lombok.extern.slf4j.Slf4j;
 
 import java.text.DecimalFormat;
+import java.time.LocalDate;
 import java.util.*;
 import java.util.Map.Entry;
 
@@ -84,7 +86,7 @@ public class TradeReport {
 			MarketBase np = nonStrategyProfitAnalyze.calcuate(t.getStock().getCode(),window);
 
 			System.out.println(String.format(DETAIL_STR, t.getStock().getCode(), f.format(p.getTotalProfitPercentage()) + "%", f.format(p.getProfit()) , t.getMarkToMarket().getMarketPrice(), t.getPositions(),
-					t.getTransactions().size(), HistoricalData.toMarketDate(np.getBeginDate()) + " - " + HistoricalData.toMarketDate(np.getEndDate()),
+					t.getTransactions().size(), DateUtils.toString(np.getBeginDate()) + " - " + DateUtils.toString(np.getEndDate()),
 					f.format(np.getBeginPrice()) + "-" + f.format(np.getEndPrice()), f.format(np.getProfitPercentage()) + "%"));
 		}
 		System.out.println("---------------------------------------------------------------");
@@ -112,14 +114,14 @@ public class TradeReport {
 		log.info(sb.toString());
 	}
 
-	public static List<Transaction> filterTransactions(List<TradingBook> tradingBooks, Date reportWindow){
+	public static List<Transaction> filterTransactions(List<TradingBook> tradingBooks, LocalDate reportWindow){
 		List<Transaction> filterTrans = Lists.newArrayList();
 		System.out.println("\n\nTRADE REPORT  BEGIN");
 		System.out.println("------------------------");
 		for (TradingBook tradingBook : tradingBooks) {
 			List<Transaction> trans = tradingBook.getTransactions();
 			for (Transaction tran : trans) {
-				if (tran.getDate().after(reportWindow)) {
+				if (tran.getDate().isAfter(reportWindow)) {
 					System.out.println("Report: " + tran.toString());
 					filterTrans.add(tran);
 				}

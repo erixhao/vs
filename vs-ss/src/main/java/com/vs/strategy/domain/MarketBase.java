@@ -3,6 +3,7 @@ package com.vs.strategy.domain;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
+import java.time.LocalDate;
 import java.util.Date;
 
 /**
@@ -12,8 +13,8 @@ import java.util.Date;
 @AllArgsConstructor
 public class MarketBase {
     // to calc pure long position price gap, see if our strategy is good or not.
-    private Date beginDate;
-    private Date endDate;
+    private LocalDate beginDate;
+    private LocalDate endDate;
     private double beginPrice;
     private double endPrice;
 

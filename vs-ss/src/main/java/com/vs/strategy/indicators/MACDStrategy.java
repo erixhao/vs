@@ -8,6 +8,7 @@ import com.vs.common.domain.enums.Strategies;
 import com.vs.common.domain.enums.TimePeriod;
 import com.vs.common.utils.DateUtils;
 import com.vs.common.utils.MarketDataUtils;
+import com.vs.repository.MarketDataRepository;
 import com.vs.strategy.AbstractStrategy;
 import com.vs.strategy.Strategy;
 import com.vs.strategy.analysis.indicators.MACDAnalyze;
@@ -15,6 +16,7 @@ import com.vs.strategy.domain.MACD;
 import com.vs.strategy.domain.MarketContext;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDate;
 import java.util.Date;
 import java.util.List;
 
@@ -26,7 +28,7 @@ public class MACDStrategy extends AbstractStrategy implements Strategy {
 
     @Override
     public String getName() {
-            return Strategies.MACDStrategy.toString();
+        return Strategies.MACDStrategy.toString();
     }
 
     @Override
@@ -35,14 +37,14 @@ public class MACDStrategy extends AbstractStrategy implements Strategy {
 
 
         Stock stock = context.getStock();
-        Date date = context.getAnalysisDate();
+        LocalDate date = context.getAnalysisDate();
 
-        List<HistoricalData> datas = this.marketService.getMarketHistoricalData(stock.getCode(), TimePeriod.DAILY);
+        List<HistoricalData> datas = MarketDataRepository.getAllMarketDataBy(stock.getCode());
         List<Double> closelist = MarketDataUtils.extractMarketClose(datas);
 
         MACD macd = MACDAnalyze.getMACD(closelist);
 
-        System.out.println(">>>>> MCAD: " + DateUtils.toMarketDate(date) + ": MACD : " + macd.toString());
+        System.out.println(">>>>> MCAD: " + DateUtils.toString(date) + ": MACD : " + macd.toString());
 
         return result;
     }

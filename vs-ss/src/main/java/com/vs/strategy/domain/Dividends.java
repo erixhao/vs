@@ -6,15 +6,14 @@ import com.vs.common.domain.HistoricalData;
 import com.vs.common.domain.Stock;
 import com.vs.common.domain.TradingBook;
 import com.vs.common.domain.Transaction;
-import com.vs.common.domain.enums.TimePeriod;
 import com.vs.common.utils.MarketDataUtils;
 import com.vs.common.utils.PropertieUtils;
-import com.vs.market.MarketDataService;
+import com.vs.repository.MarketDataRepository;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDate;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -27,25 +26,18 @@ import java.util.Map;
 @Component
 @Slf4j
 public class Dividends {
-    private static MarketDataService marketDataService;
-    private static Map<Stock, List<Date>> stockSplitsDate;
+    private static Map<Stock, List<LocalDate>> stockSplitsDate;
 
-
-    @Autowired(required = true)
-    public void setMarketDataService(MarketDataService marketService) {
-        marketDataService = marketService;
-    }
-
-    private static Map<Stock, List<Date>> getStockSplitsDate(){
-        if ( stockSplitsDate == null ){
+    private static Map<Stock, List<LocalDate>> getStockSplitsDate() {
+        if (stockSplitsDate == null) {
             stockSplitsDate = extractStockSplitDates(null);
         }
 
         return stockSplitsDate;
     }
 
-    private static synchronized Map<Stock, List<Date>> extractStockSplitDates(Stock stock) {
-        Map<Stock, List<Date>> map = Maps.newConcurrentMap();
+    private static synchronized Map<Stock, List<LocalDate>> extractStockSplitDates(Stock stock) {
+        Map<Stock, List<LocalDate>> map = Maps.newConcurrentMap();
         List<Stock> stocks = Lists.newArrayList();
 
         if (stock == null) {
@@ -55,47 +47,47 @@ public class Dividends {
         }
 
         for (Stock s : stocks) {
-            List<Date> dates = findSplitDates(s);
+            List<LocalDate> dates = findSplitDates(s);
             map.put(s, dates);
         }
 
         return map;
     }
 
-    private static List<Date> getSplitDate(Stock stock) {
+    private static List<LocalDate> getSplitDate(Stock stock) {
         return getStockSplitsDate().get(stock);
     }
 
-    public static boolean isSplitDate(Stock stock, Date transDate) {
+    public static boolean isSplitDate(Stock stock, LocalDate transDate) {
         return getSplitDate(stock) == null ? false : getSplitDate(stock).contains(transDate);
 
     }
 
 
-    public static List<Double> adjustDividendsSplit(Stock stock, Date divideDate, HistoricalData market, List<Double> prices) {
+    public static List<Double> adjustDividendsSplit(Stock stock, LocalDate divideDate, HistoricalData market, List<Double> prices) {
         double raio = getSplitRaio(stock, market.getOpen(), divideDate);
 
-        if ( raio == 0 )
+        if (raio == 0)
             return prices;
 
         List<Double> adjPrices = Lists.newArrayList();
 
-        for (Double price : prices){
-            adjPrices.add(price/raio);
+        for (Double price : prices) {
+            adjPrices.add(price / raio);
         }
 
         return adjPrices;
     }
 
 
-    public void adjustTradeDividendsSplit(TradingBook tradingBook, Date divideDate, HistoricalData market) {
-        if ( tradingBook.getPositions() <=0 )
+    public void adjustTradeDividendsSplit(TradingBook tradingBook, LocalDate divideDate, HistoricalData market) {
+        if (tradingBook.getPositions() <= 0)
             return;
 
         for (Transaction tran : tradingBook.getTransactions()) {
             //if (!tran.isClosed() && tran.getDirection().equals(TradeDirection.BUY) && tran.getDate().before(divideDate)) {
-            if ( tran.getDate().before(divideDate)) {
-            //log.info("++++++++++++++++++++++++ adjustTradeDividendsSplit, before tran: " + tran.toString());
+            if (tran.getDate().isBefore(divideDate)) {
+                //log.info("++++++++++++++++++++++++ adjustTradeDividendsSplit, before tran: " + tran.toString());
                 double raio = getSplitRaio(tradingBook.getStock(), market.getOpen(), divideDate);
 
                 tran.setPositions((long) (tran.getPositions() * raio));
@@ -108,21 +100,21 @@ public class Dividends {
         }
     }
 
-    private Date getLatestSplitDate(Stock stock, Date transDate) {
-        List<Date> splitDates = getSplitDate(stock);
+    private LocalDate getLatestSplitDate(Stock stock, LocalDate transDate) {
+        List<LocalDate> splitDates = getSplitDate(stock);
 
-        for (Date s : splitDates) {
-            if (transDate.equals(s) || transDate.before(s))
+        for (LocalDate s : splitDates) {
+            if (transDate.equals(s) || transDate.isBefore(s))
                 return s;
         }
 
         return null;
     }
 
-    private static List<Date> findSplitDates(Stock stock) {
-        List<Date> splitDates = Lists.newArrayList();
+    private static List<LocalDate> findSplitDates(Stock stock) {
+        List<LocalDate> splitDates = Lists.newArrayList();
 
-        List<HistoricalData> markets = marketDataService.getMarketHistoricalData(stock.getCode(), TimePeriod.DAILY);
+        List<HistoricalData> markets = MarketDataRepository.getAllMarketDataBy(stock.getCode());
 
         if (markets == null)
             return splitDates;
@@ -130,12 +122,12 @@ public class Dividends {
         Collections.sort(markets);
 
         int last = markets.size() - 1;
-        for (int i = 1; i <= last -1; i++) {
+        for (int i = 1; i <= last - 1; i++) {
 
             HistoricalData d0 = markets.get(i);
             HistoricalData p1 = markets.get(i - 1);
 
-            if (d0 == null || p1 == null || !MarketDataUtils.isTradingDate(d0) || !MarketDataUtils.isTradingDate(p1))
+            if (d0 == null || p1 == null || !MarketDataUtils.isTradingDate(d0.getDate()) || !MarketDataUtils.isTradingDate(p1.getDate()))
                 continue;
 
             double d0Open = d0.getOpen();
@@ -151,12 +143,12 @@ public class Dividends {
         return splitDates;
     }
 
-    private static double getSplitRaio(Stock stock, double openPrice, Date splitDate) {
+    private static double getSplitRaio(Stock stock, double openPrice, LocalDate splitDate) {
 
         if (openPrice <= 0)
             return 1;
 
-        List<HistoricalData> datas = marketDataService.getMarketHistoricalData(stock.getCode(), TimePeriod.DAILY);
+        List<HistoricalData> datas = MarketDataRepository.getAllMarketDataBy(stock.getCode());
         HistoricalData p1 = MarketDataUtils.getMarketT(datas, splitDate, -1);
 
         return p1.getClose() / openPrice;

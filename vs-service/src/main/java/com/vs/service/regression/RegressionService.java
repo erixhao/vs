@@ -12,14 +12,13 @@ import com.vs.service.trade.TraderService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-
-import static com.vs.common.domain.HistoricalData.toMarketDate;
 
 
 /**
@@ -30,30 +29,29 @@ public class RegressionService {
     private final static long capital = 100000;
 
     private final static String STRESS_BEGIN_DATE = "2006-01-01";
-    private final static String STRESS_END_DATE   = "2016-01-01";
+    private final static String STRESS_END_DATE = "2016-01-01";
     private final static int STRESS_TIMES = 10;
     private final static int STRESS_TIME_WINDOW = -12; // 1 Year
 
 
+    private final static TimeWindow full_2015 = new TimeWindow(LocalDate.of(2014, 1, 1), LocalDate.of(2015, 9, 1), TimePeriod.DAILY);
+    private final static TimeWindow full_2016 = new TimeWindow(LocalDate.of(2015, 1, 1), LocalDate.of(2016, 1, 26), TimePeriod.DAILY);
+    private final static TimeWindow bull_2014 = new TimeWindow(LocalDate.of(2014, 1, 1), LocalDate.of(2015, 5, 1), TimePeriod.DAILY);
 
-    private final static TimeWindow full_2015 = new TimeWindow(toMarketDate("2014-01-01"), toMarketDate("2015-09-01"), TimePeriod.DAILY);
-    private final static TimeWindow full_2016 = new TimeWindow(toMarketDate("2015-01-01"), toMarketDate("2016-01-26"), TimePeriod.DAILY);
-    private final static TimeWindow bull_2014 = new TimeWindow(toMarketDate("2014-01-01"), toMarketDate("2015-05-01"), TimePeriod.DAILY);
 
+    private final static TimeWindow full_2015_callapse = new TimeWindow(LocalDate.of(2015, 5, 1), LocalDate.of(2015, 9, 1), TimePeriod.DAILY);
+    private final static TimeWindow bear_2015_callapse = new TimeWindow(LocalDate.of(2015, 6, 1), LocalDate.of(2015, 9, 1), TimePeriod.DAILY);
 
-    private final static TimeWindow full_2015_callapse = new TimeWindow(toMarketDate("2015-05-01"), toMarketDate("2015-09-01"), TimePeriod.DAILY);
-    private final static TimeWindow bear_2015_callapse = new TimeWindow(toMarketDate("2015-06-01"), toMarketDate("2015-09-01"), TimePeriod.DAILY);
+    private final static TimeWindow full_2007 = new TimeWindow(LocalDate.of(2015, 2, 15), LocalDate.of(2008, 12, 20), TimePeriod.DAILY);
+    private final static TimeWindow bear_2008 = new TimeWindow(LocalDate.of(2007, 10, 15), LocalDate.of(2008, 12, 20), TimePeriod.DAILY);
+    private final static TimeWindow bull_2007 = new TimeWindow(LocalDate.of(2015, 2, 15), LocalDate.of(2007, 10, 20), TimePeriod.DAILY);
+    private final static TimeWindow full_10_years = new TimeWindow(LocalDate.of(2015, 2, 15), LocalDate.of(2007, 8, 20), TimePeriod.DAILY);
 
-    private final static TimeWindow full_2007 = new TimeWindow(toMarketDate("2005-02-15"), toMarketDate("2008-12-20"), TimePeriod.DAILY);
-    private final static TimeWindow bear_2008 = new TimeWindow(toMarketDate("2007-10-15"), toMarketDate("2008-12-20"), TimePeriod.DAILY);
-    private final static TimeWindow bull_2007 = new TimeWindow(toMarketDate("2005-02-15"), toMarketDate("2007-10-20"), TimePeriod.DAILY);
-    private final static TimeWindow full_10_years = new TimeWindow(toMarketDate("2005-02-15"), toMarketDate("2017-08-20"), TimePeriod.DAILY);
-
-    private final static TimeWindow bull_2009 = new TimeWindow(toMarketDate("2009-01-15"), toMarketDate("2010-01-20"), TimePeriod.DAILY);
-    private final static TimeWindow window_2016 = new TimeWindow(toMarketDate("2016-01-01"), toMarketDate("2016-12-31"), TimePeriod.DAILY);
-    private final static TimeWindow window_20166 = new TimeWindow(toMarketDate("2016-07-01"), toMarketDate("2016-12-31"), TimePeriod.DAILY);
-    private final static TimeWindow window_20163 = new TimeWindow(toMarketDate("2016-10-01"), toMarketDate("2016-12-31"), TimePeriod.DAILY);
-    private final static TimeWindow window_20161 = new TimeWindow(toMarketDate("2016-12-01"), toMarketDate("2016-12-31"), TimePeriod.DAILY);
+    private final static TimeWindow bull_2009 = new TimeWindow(LocalDate.of(2009, 1, 15), LocalDate.of(2010, 1, 20), TimePeriod.DAILY);
+    private final static TimeWindow window_2016 = new TimeWindow(LocalDate.of(2016, 1, 1), LocalDate.of(2016, 12, 31), TimePeriod.DAILY);
+    private final static TimeWindow window_20166 = new TimeWindow(LocalDate.of(2016, 7, 1), LocalDate.of(2016, 12, 31), TimePeriod.DAILY);
+    private final static TimeWindow window_20163 = new TimeWindow(LocalDate.of(2016, 10, 1), LocalDate.of(2016, 12, 31), TimePeriod.DAILY);
+    private final static TimeWindow window_20161 = new TimeWindow(LocalDate.of(2016, 12, 1), LocalDate.of(2016, 12, 31), TimePeriod.DAILY);
 
 
     private List<TimeWindow> timeWindows = Lists.newArrayList(full_2016, full_2015, full_2007, bear_2008, bull_2014, bull_2007);
@@ -113,14 +111,14 @@ public class RegressionService {
     }
 
 
-    public List<RegressionResult>  stress() {
+    public List<RegressionResult> stress() {
         Date begin = DateUtils.toMarketDate(STRESS_BEGIN_DATE);
-        Date end   = DateUtils.toMarketDate(STRESS_END_DATE);
+        Date end = DateUtils.toMarketDate(STRESS_END_DATE);
 
         List<TimeWindow> windows = Lists.newArrayList();
-        for ( int i = 0; i < STRESS_TIMES; i++ ){
-            Date randomDate = DateUtils.randomDate(begin,end);
-            windows.add(TimeWindow.getTimeWindow(TimePeriod.DAILY,randomDate,0,STRESS_TIME_WINDOW,0));
+        for (int i = 0; i < STRESS_TIMES; i++) {
+            LocalDate randomDate = LocalDate.now();//TODO need this?//DateUtils.randomDate(begin,end);
+            windows.add(TimeWindow.getTimeWindow(TimePeriod.DAILY, randomDate, 0, STRESS_TIME_WINDOW, 0));
         }
         return regression(windows);
     }

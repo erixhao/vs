@@ -12,6 +12,7 @@ import com.vs.strategy.domain.MarketContext;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDate;
 import java.util.Date;
 import java.util.List;
 
@@ -35,7 +36,7 @@ public class LMKeepProfit extends AbstractStrategy implements Strategy {
         List<TradeAction> result = Lists.newArrayList();
 
         Stock stock = context.getStock();
-        Date date = context.getAnalysisDate();
+        LocalDate date = context.getAnalysisDate();
         TradingBook tradingBook = context.getTradingBook();
 
         if (tradingBook.getPositions() == 0)

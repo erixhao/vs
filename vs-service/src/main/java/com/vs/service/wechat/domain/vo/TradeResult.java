@@ -3,6 +3,7 @@ package com.vs.service.wechat.domain.vo;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
+import java.time.LocalDate;
 import java.util.Date;
 
 /**
@@ -14,7 +15,7 @@ public class TradeResult {
 
     boolean isTradeSingal;
     boolean isBuySingal;
-    private Date tradeDate;
+    private LocalDate tradeDate;
     private String response;
 
     private double profit;

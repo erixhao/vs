@@ -3,6 +3,7 @@ package com.vs.service.wechat.service;
 import com.google.common.collect.Lists;
 import com.vs.common.utils.BeanContext;
 import com.vs.market.MarketService;
+import com.vs.repository.MarketDataRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -26,7 +27,7 @@ public class EODService {
     private WeChatService weChatService;
 
     public void process(){
-        process(marketService.getAllExistingCodes());
+        process(MarketDataRepository.getAllExistingCodes());
     }
 
     public void process(String stocks){

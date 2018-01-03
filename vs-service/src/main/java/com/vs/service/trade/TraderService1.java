@@ -6,7 +6,6 @@ import com.vs.common.domain.TradingBook;
 import com.vs.common.domain.enums.TimePeriod;
 import com.vs.common.domain.vo.TimeWindow;
 import com.vs.common.utils.PropertieUtils;
-import com.vs.market.MarketDataService;
 import com.vs.strategy.StrategyService;
 import com.vs.strategy.domain.Dividends;
 import com.vs.strategy.gann.PyramidStrategy;
@@ -39,8 +38,6 @@ public class TraderService1 {
     @Autowired
     private StrategyService strategyService;
     @Autowired
-    private MarketDataService marketService;
-    @Autowired
     @Getter
     private PyramidStrategy pyramidStrategy;
     @Autowired
@@ -55,7 +52,6 @@ public class TraderService1 {
         List<TradingBook> tradingBooks = Lists.newArrayList();
 
         TradeManager manager = new TradeManager(null, timeWindow, period, totalCapital);
-        manager.setMarketService(marketService);
         manager.setStrategyService(strategyService);
         manager.setPyramidStrategy(pyramidStrategy);
         manager.setDividends(dividends);

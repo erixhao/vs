@@ -8,6 +8,7 @@ import com.vs.common.domain.vo.TimeWindow;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
+import java.time.LocalDate;
 import java.util.Date;
 
 /**
@@ -17,7 +18,7 @@ import java.util.Date;
 @Data
 public class MarketContext {
     private TradingBook tradingBook;
-    private Date analysisDate;
+    private LocalDate analysisDate;
     private TimeWindow timeWindow;
     private TimePeriod period = TimePeriod.NONE;
     private double marketPrice = 0;

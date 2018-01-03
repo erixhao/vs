@@ -3,12 +3,14 @@ package com.vs.strategy.domain;
 import com.google.common.collect.Lists;
 import com.vs.common.domain.HistoricalData;
 import com.vs.common.domain.enums.SortOrder;
+import com.vs.common.utils.DateUtils;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
@@ -21,8 +23,8 @@ import java.util.List;
 @NoArgsConstructor
 public class MarketPeak implements Comparable<MarketPeak> {
 
-    private Date begin;
-    private Date end;
+    private LocalDate begin;
+    private LocalDate end;
 
     private HistoricalData data;
     private Peak type;
@@ -38,27 +40,26 @@ public class MarketPeak implements Comparable<MarketPeak> {
 
     @Override
     public String toString() {
-        SimpleDateFormat format = new SimpleDateFormat(HistoricalData.MARKET_DATE_FORMAT);
-        String begin = format.format(this.begin);
-        String end = format.format(this.end);
+        String begin = DateUtils.toString(this.begin);
+        String end = DateUtils.toString(this.end);
 
-        return "stock: " + this.data.getCode() + " between (" + begin + " to " + end + "), " + this.data.period.toString() + " " + this.type.toString() + " date: " + format.format(this.data.getDate())
+        return "stock: " + this.data.getStockCode() + " between (" + begin + " to " + end + "), "
+                + this.data.period.toString() + " " + this.type.toString() + " date: " + DateUtils.toString(this.data.getDate())
                 + " " + (this.type.equals(Peak.TOP) ? "H" : "L") + " : " + new DecimalFormat("0.##").format(this.peak)
                 + " weight: " + this.weight.toString();
     }
 
     public String toShortString() {
-        SimpleDateFormat format = new SimpleDateFormat(HistoricalData.MARKET_DATE_FORMAT);
-        String begin = format.format(this.begin);
-        String end = format.format(this.end);
+        String begin = DateUtils.toString(this.begin);
+        String end = DateUtils.toString(this.end);
 
-        return "{stock: " + this.data.getCode() + " date: " + format.format(this.data.getDate())
+        return "{stock: " + this.data.getStockCode() + " date: " + DateUtils.toString(this.data.getDate())
                 + " " + (this.type.equals(Peak.TOP) ? "H" : "L") + " : " + new DecimalFormat("0.##").format(this.peak)
                 + "}";
     }
 
-    public static void printShortString(List<MarketPeak> peaks){
-        for ( MarketPeak p : peaks ){
+    public static void printShortString(List<MarketPeak> peaks) {
+        for (MarketPeak p : peaks) {
             System.out.print(p.toShortString() + ", ");
         }
     }
@@ -91,7 +92,7 @@ public class MarketPeak implements Comparable<MarketPeak> {
     }
 
     public final static List<MarketPeak> extractPeak(List<MarketPeak> marketPeaks) {
-        return extractPeak(marketPeaks,0);
+        return extractPeak(marketPeaks, 0);
     }
 
 

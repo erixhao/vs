@@ -12,6 +12,7 @@ import com.vs.common.utils.MarketDataUtils;
 import com.vs.strategy.domain.MarketContext;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDate;
 import java.util.Date;
 import java.util.List;
 
@@ -28,7 +29,7 @@ public final class HighLowMoveOptimisticStrategy {
     public TradeAction execute(final MarketContext context, final List<HistoricalData> datas, HistoricalData next, double DELTA_INDEX_PERCENTAGE, double DELTA_PERCENTAGE, BullBear trend){
 
         Stock stock = context.getStock();
-        Date date = context.getAnalysisDate();
+        LocalDate date = context.getAnalysisDate();
 
         HistoricalData d0 = MarketDataUtils.getMarketCurrent(datas,date);
         HistoricalData p1 = MarketDataUtils.getMarketT(datas, date, -1);

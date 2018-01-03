@@ -1,9 +1,8 @@
 package com.vs.service.wechat.controller;
 
 import com.google.common.collect.Lists;
-import com.vs.common.domain.enums.TimePeriod;
 import com.vs.common.utils.PropertieUtils;
-import com.vs.market.MarketDataDownloader;
+import com.vs.market.DownloadExecutor;
 import com.vs.service.wechat.service.EODService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,14 +19,12 @@ import java.util.Date;
 @RestController
 public class MarketScheduler {
     @Autowired
-    private MarketDataDownloader marketDataDownloader;
-    @Autowired
     private EODService eodService;
 
     @Scheduled(cron="0 10 15 ? * MON-FRI", zone= "Asia/Shanghai")
     public void schedule(){
         log.info(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> schedule trigger: refresh: " + new Date().toString());
-        marketDataDownloader.syncMarketData();
+        DownloadExecutor.downloadAll();
     }
 
     @Scheduled(cron="0 05 15 ? * MON-FRI", zone= "Asia/Shanghai")
@@ -35,7 +32,8 @@ public class MarketScheduler {
         String index = PropertieUtils.getMarketProperty("market.index");
         log.info(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> schedule trigger: refresh: market Index : " + index + " on :" + new Date().toString());
         if ( !StringUtils.isEmpty(index) ){
-            marketDataDownloader.downloadMarketData(Lists.newArrayList(index.split(",")), TimePeriod.DAILY, -1, false);
+            DownloadExecutor.loadAllMarketData(Lists.newArrayList(index.split(",")));
+//            marketDataDownloader.downloadMarketData(Lists.newArrayList(index.split(",")), TimePeriod.DAILY, -1, false);
         }
     }
 

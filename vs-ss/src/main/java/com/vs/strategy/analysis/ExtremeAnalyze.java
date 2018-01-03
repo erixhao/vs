@@ -8,7 +8,7 @@ import com.vs.common.domain.enums.SortOrder;
 import com.vs.common.domain.enums.TimePeriod;
 import com.vs.common.domain.vo.TimeWindow;
 import com.vs.common.utils.MarketDataUtils;
-import com.vs.market.MarketDataService;
+import com.vs.repository.MarketDataRepository;
 import com.vs.strategy.domain.Dividends;
 import com.vs.strategy.domain.MarketPeak;
 import com.vs.strategy.domain.Peak;
@@ -16,6 +16,7 @@ import com.vs.strategy.domain.Weight;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDate;
 import java.util.*;
 
 /**
@@ -26,23 +27,24 @@ public class ExtremeAnalyze {
 
     private final static float MINOR_TIME_WINDOW_GAP = 0.1f;
     @Autowired
-    private MarketDataService marketDataService;
-    @Autowired
     private Dividends dividends;
 
     public Map<Peak, List<MarketPeak>> determinMarketPeaks(Stock stock, TimeWindow timeWindow, int rank) {
-        return determinMarketPeaks(stock,timeWindow.getBegin(),timeWindow.getEnd(),timeWindow.getPeriod(),rank);
+        return determinMarketPeaks(stock, timeWindow.getBegin(), timeWindow.getEnd(), timeWindow.getPeriod(), rank);
     }
 
-    public Map<Peak, List<MarketPeak>> determinMarketPeaks(Stock stock, Date begin, Date end, TimePeriod timePeriod, int rank) {
+    public Map<Peak, List<MarketPeak>> determinMarketPeaks(Stock stock, LocalDate begin, LocalDate end, TimePeriod timePeriod, int rank) {
 
-        List<HistoricalData> historicalDatas = this.marketDataService.getMarketHistoricalData(stock.getCode(), timePeriod, begin, end);
+        List<HistoricalData> historicalDatas = MarketDataRepository.getAllMarketDataBy(stock.getCode(), begin, end);
+        //this.marketDataService.getMarketHistoricalData(stock.getCode(), timePeriod, begin, end);
         return determinMarketPeaks(stock, historicalDatas, rank);
     }
 
-    public Map<Peak, List<MarketPeak>> determinMarketPeaks(Stock stock, List<HistoricalData> historicalDatas, Date begin, Date end, int rank) {
-        return determinMarketPeaks(stock, MarketDataUtils.extractByDate(historicalDatas, begin, end), rank);
+    public Map<Peak, List<MarketPeak>> determinMarketPeaks(Stock stock, List<HistoricalData> historicalDatas, LocalDate begin, LocalDate end, int rank) {
+//        return determinMarketPeaks(stock, MarketDataUtils.extractByDate(historicalDatas, begin, end), rank);
+        return determinMarketPeaks(stock, MarketDataRepository.filterBy(historicalDatas, begin, end), rank);
     }
+
 
     private Map<Peak, List<MarketPeak>> determinMarketPeaks(Stock stock, final List<HistoricalData> datas, int top) {
 
@@ -51,8 +53,8 @@ public class ExtremeAnalyze {
         List<MarketPeak> peaks = Lists.newArrayList();
         HistoricalData previous = null;
         double previousSlope = 0;
-        Date begin = datas.get(0).getDate();
-        Date end = datas.get(datas.size() - 1).getDate();
+        LocalDate begin = datas.get(0).getDate();
+        LocalDate end = datas.get(datas.size() - 1).getDate();
 
         for (int i = 0; i < datas.size(); i++) {
 
@@ -68,12 +70,12 @@ public class ExtremeAnalyze {
             }
 
             double slopeH = d.getHigh() - previous.getHigh();
-            double slopeL = d.getLow()  - previous.getLow();
+            double slopeL = d.getLow() - previous.getLow();
 
             boolean trendChanged = (slopeH * previousSlope < 0) || (slopeL * previousSlope < 0);
-            double slope = trendChanged ? (slopeH * previousSlope < 0 ? slopeH : slopeL ) : slopeH;
+            double slope = trendChanged ? (slopeH * previousSlope < 0 ? slopeH : slopeL) : slopeH;
 
-            if ( trendChanged ) {
+            if (trendChanged) {
                 Peak peakType = (slope > 0 ? Peak.BOTTOM : Peak.TOP);
                 double peak = (peakType.equals(Peak.TOP) ? previous.getHigh() : previous.getLow());
                 Weight weight = this.calcuatePeakWeight(datas, d.getDate(), peakType, peak);
@@ -89,10 +91,10 @@ public class ExtremeAnalyze {
                 MarketPeak lastHigh = this.getLastPeak(peaks, Peak.TOP);
                 MarketPeak lastLow = this.getLastPeak(peaks, Peak.BOTTOM);
 
-                if ( lastLow != null && d.getLow() < lastLow.getPeak()) {
+                if (lastLow != null && d.getLow() < lastLow.getPeak()) {
                     Weight weight = this.calcuatePeakWeight(datas, d.getDate(), Peak.BOTTOM, d.getLow());
                     peaks.add(new MarketPeak(begin, end, previous, Peak.BOTTOM, i, d.getLow(), weight));
-                } else if ( lastHigh != null && d.getHigh() > lastHigh.getPeak()) {
+                } else if (lastHigh != null && d.getHigh() > lastHigh.getPeak()) {
                     Weight weight = this.calcuatePeakWeight(datas, d.getDate(), Peak.TOP, d.getHigh());
                     peaks.add(new MarketPeak(begin, end, previous, Peak.TOP, i, d.getHigh(), weight));
                 }
@@ -124,11 +126,11 @@ public class ExtremeAnalyze {
             }
         }
 
-        if ( tops.size() != 0 ){
+        if (tops.size() != 0) {
             getTopest(tops).adjustRatio(1 / MINOR_TIME_WINDOW_GAP);
         }
 
-        if ( boms.size() != 0 ){
+        if (boms.size() != 0) {
             getTopest(boms).adjustRatio(1 / MINOR_TIME_WINDOW_GAP);
 
         }
@@ -203,15 +205,15 @@ public class ExtremeAnalyze {
     }
 
 
-    private static Weight calcuatePeakWeight(List<HistoricalData> datas, Date currentDate, Peak type, double peak) {
+    private static Weight calcuatePeakWeight(List<HistoricalData> datas, LocalDate currentDate, Peak type, double peak) {
         Collections.sort(datas);
 
         int current = MarketDataUtils.indexOf(datas, currentDate);
         Weight w = new Weight();
 
         // check past
-        for (int i = current;i >= 0; i--) {
-            if ( !MarketDataUtils.isTradingDate(datas.get(i)) )
+        for (int i = current; i >= 0; i--) {
+            if (!MarketDataUtils.isTradingDate(datas.get(i).getDate()))
                 continue;
 
             boolean sameTrend = (type.equals(Peak.TOP) ? datas.get(i).getHigh() <= peak : datas.get(i).getLow() >= peak);
@@ -225,7 +227,7 @@ public class ExtremeAnalyze {
         // current
         // check after
         for (int i = current; i < datas.size(); i++) {
-            if ( !MarketDataUtils.isTradingDate(datas.get(i)) )
+            if (!MarketDataUtils.isTradingDate(datas.get(i).getDate()))
                 continue;
 
             boolean sameTrend = (type.equals(Peak.TOP) ? datas.get(i).getHigh() <= peak : datas.get(i).getLow() >= peak);

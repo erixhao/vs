@@ -17,6 +17,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDate;
 import java.util.Date;
 import java.util.List;
 
@@ -43,35 +44,35 @@ public class StopLossStrategy extends AbstractStrategy implements Strategy {
     }
 
     @Override
-    public List<TradeAction> execute(MarketContext context){
+    public List<TradeAction> execute(MarketContext context) {
         List<TradeAction> result = Lists.newArrayList();
 
         Stock stock = context.getStock();
-        Date date = context.getAnalysisDate();
+        LocalDate date = context.getAnalysisDate();
         TradingBook tradingBook = context.getTradingBook();
 
-        if ( tradingBook.getPositions() == 0 )
+        if (tradingBook.getPositions() == 0)
             return result;
 
         List<Transaction> transactions = tradingBook.getTransactions();
-        BullBear stockTrend = marketTrendAnalyze.analysisTrend(stock.getCode(),date);
+        BullBear stockTrend = marketTrendAnalyze.analysisTrend(stock.getCode(), date);
 
-        for ( Transaction tran : transactions ){
+        for (Transaction tran : transactions) {
 
-            if ( tran.getDate().after(date) || !tran.getDirection().equals(TradeDirection.BUY) || tran.isClosed() ){
+            if (tran.getDate().isAfter(date) || !tran.getDirection().equals(TradeDirection.BUY) || tran.isClosed()) {
                 continue;
             }
 
             double stopLossPercentage = stockTrend.isBigBull() ? DEFAULT_STOPLOSS_PERCENTAGE * BULL_RATIO : DEFAULT_STOPLOSS_PERCENTAGE;
-            double stopLossPrice = tran.getPrice() * (100 + stopLossPercentage)/100;
+            double stopLossPrice = tran.getPrice() * (100 + stopLossPercentage) / 100;
             double currentProfit = tran.getProfitPercentage(context.getMarketPrice());
 
             //boolean isStopLoss = trend.isBull() ? trade.getProfit().getCurrProfitPercentage() <= stopLossPercentage : currentProfit <= stopLossPercentage;
 
-            if ( currentProfit <= stopLossPercentage ) {
+            if (currentProfit <= stopLossPercentage) {
                 //System.out.println(">>>>>>  Stock: " + stockTrend.toString());
                 //System.out.println("STOP : currentProfit: " + currentProfit + " StopLoss: " + stopLossPercentage);
-                TradeAction action = new TradeAction(Strategies.StopLossStrategy,TradeDirection.SELL,stock,date,date);
+                TradeAction action = new TradeAction(Strategies.StopLossStrategy, TradeDirection.SELL, stock, date, date);
 
                 action.setTradeDate(date);
                 action.setTradePrice(stopLossPrice);

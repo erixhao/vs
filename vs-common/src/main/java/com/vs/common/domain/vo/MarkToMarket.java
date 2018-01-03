@@ -4,6 +4,7 @@ import com.vs.common.domain.Stock;
 import lombok.Data;
 import lombok.Getter;
 
+import java.time.LocalDate;
 import java.util.Date;
 
 /**
@@ -14,7 +15,7 @@ public class MarkToMarket {
     @Getter
     private Stock stock;
 
-    private Date marketDate;
+    private LocalDate marketDate;
     private double marketPrice;
     private final double totalCapital;
     private double availCapital;
