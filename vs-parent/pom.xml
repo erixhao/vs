@@ -15,7 +15,7 @@
 
     <modules>
         <module>../vs-common</module>
-        <module>../vs-dao</module>
+        <module>../vs-repository</module>
         <module>../vs-market</module>
         <module>../vs-service</module>
         <module>../vs-ss</module>

@@ -72,9 +72,9 @@ public class DailyBatch {
         //TimeWindow tradWindow = new TimeWindow(toMarketDate("2016-04-26"),today,TimePeriod.DAILY);
         //TimeWindow tradWindow = new TimeWindow(toMarketDate("2017-01-01"),today,TimePeriod.DAILY);
 
-        //TimeWindow tradWindow = new TimeWindow(toMarketDate("2016-03-01"),toMarketDate("2017-08-25"),TimePeriod.DAILY);
+        TimeWindow tradWindow = new TimeWindow(LocalDate.of(2017,1,1), LocalDate.of(2017,12,29),TimePeriod.DAILY);
 
-        TimeWindow tradWindow = TimeWindow.getLastMonths(TimePeriod.DAILY,-3);
+//        TimeWindow tradWindow = TimeWindow.getLastMonths(TimePeriod.DAILY,-3);
 
         List<Transaction> todayTrans = Lists.newArrayList();
         List<String> codes = PropertieUtils.getStockCodeList();
