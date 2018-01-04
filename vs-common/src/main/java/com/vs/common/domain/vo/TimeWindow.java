@@ -71,6 +71,7 @@ public class TimeWindow {
     }
 
     public static TimeWindow getTimeWindow(TimePeriod period, LocalDate end, int year, int month, int day) {
-        return new TimeWindow(LocalDate.of(year, month, day), end, period);
+        LocalDate start = end.minusYears(year).minusMonths(month).minusDays(day);
+        return new TimeWindow(start, end, period);
     }
 }

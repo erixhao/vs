@@ -31,6 +31,7 @@ public class FileUtil {
     }
 
     private static boolean getBackupFlag() {
+//        System.out.println(FileUtil.class.getResource("/config.properties").getPath().toString());
         InputStream in = FileUtil.class.getResourceAsStream("/config.properties");
 
         Reader f = new InputStreamReader(in);
@@ -104,6 +105,7 @@ public class FileUtil {
             while ((line = bufReader.readLine()) != null) {
                 if (StringUtils.isNotBlank(line)) {
                     T entity = clazz.newInstance();
+//                    System.out.println(line);
                     entities.add(entity.from(line));
                 }
             }

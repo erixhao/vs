@@ -84,5 +84,9 @@ public class DownloadTask implements Runnable {
         DataAccessService.save(Stock.class, stockList);
     }
 
+    public static void main(String[] args) {
+//        downloadStockTask();
+        downloadHistoryDataTask("601318");
+    }
 
 }

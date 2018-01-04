@@ -36,12 +36,18 @@ public class DownloadExecutor {
     }
 
     public static void downloadAll() {
-//        DownloadTask.downloadStockTask();
+        if (DataAccessService.findAll(Stock.class).size() == 0) {
+            DownloadTask.downloadStockTask();
+        }
 
         List<Stock> stockList = DataAccessService.findAll(Stock.class);
 
         for (Stock stock : stockList) {
             DownloadTask.downloadHistoryDataTask(stock.getCode());
         }
+    }
+
+    public static void main(String[] args) {
+        DownloadExecutor.downloadAll();
     }
 }
