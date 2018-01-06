@@ -85,8 +85,8 @@ public class DownloadTask implements Runnable {
     }
 
     public static void main(String[] args) {
-//        downloadStockTask();
-        downloadHistoryDataTask("601318");
+        downloadStockTask();
+//        downloadHistoryDataTask("601318");
     }
 
 }
