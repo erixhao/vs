@@ -1,11 +1,13 @@
 package com.vs.common.utils;
 
-import com.vs.common.domain.vo.TimeWindow;
 import lombok.extern.slf4j.Slf4j;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
@@ -96,6 +98,10 @@ public class DateUtils {
         }
 
         return d;
+    }
+
+    public static String toMarketDate(LocalDate date) {
+        return date.format(DateTimeFormatter.ofPattern(MARKET_DATE_FORMAT));
     }
 
     public static String toMarketDate(Date date) {
@@ -202,6 +208,13 @@ public class DateUtils {
 
     public static boolean isSameDate(Date d1, Date d2) {
         return toMarketDate(timeZoneDate(d1)).equals(toMarketDate(timeZoneDate(d2)));
+    }
+
+    public static Date toDate(LocalDate localDate){
+        ZoneId zoneId = ZoneId.systemDefault();
+        ZonedDateTime zdt = localDate.atStartOfDay(zoneId);
+
+        return Date.from(zdt.toInstant());
     }
 
     public static int compareTo(Date d1, Date d2) {

@@ -2,11 +2,8 @@ package com.vs.common.utils;
 
 import com.google.common.collect.Lists;
 import com.vs.common.domain.HistoricalData;
-import com.vs.common.domain.enums.MarketIndexs;
-import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.stereotype.Component;
 
-import java.text.SimpleDateFormat;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.util.Calendar;
@@ -121,20 +118,44 @@ public final class MarketDataUtils {
     }
 
     public static HistoricalData getMarketT(List<HistoricalData> datas, LocalDate current, int t) {
-        LocalDate nextTradeDate = current;
+        Collections.sort(datas);
+
+        int currIndex = indexOf(datas, current);
+        if (currIndex == -1)
+            return null;
+
+        if (t == 0) {
+            return datas.get(currIndex);
+        }
+
+        int index = currIndex + t;
+        if (index < 0) {
+            return datas.get(0);
+        } else if (index >= datas.size()) {
+            return null;
+        } else {
+            return datas.get(index);
+        }
+    }
+
+    public static HistoricalData getMarketT1(List<HistoricalData> datas, LocalDate current, int t) {
+        LocalDate date = current;
         while (t > 0) {
-            nextTradeDate = getNextTradeDate(current);
+            date = getNextTradeDate(current);
             t--;
         }
 
+
         for (HistoricalData data : datas) {
-            if (data.getDate().equals(nextTradeDate)) {
+            if (data.getDate().equals(date)) {
                 return data;
             }
         }
 
         return null;
     }
+
+
 
     public static List<Double> extractMarketClose(List<HistoricalData> datas) {
         List<Double> list = Lists.newArrayList();

@@ -1,6 +1,6 @@
 package com.vs.common.utils;
 
-import java.util.Date;
+import java.time.LocalDate;
 
 /**
  * Created by erix-mac on 16/7/29.
@@ -8,9 +8,8 @@ import java.util.Date;
 public final class DebugUtils {
 
 
-    public static void debugAt(Date date, String mkDate){
+    public static void debugAt(LocalDate date, String mkDate){
         //DebugUtils.debugAt(date,"2016-09-23");
-
         // DEBUG DATE
         if ( DateUtils.toMarketDate(date).equals(mkDate)) {
             System.out.println(">>>>>>>>>>>>DebugUtils MrkDate@  " + DateUtils.toMarketDate(date));
