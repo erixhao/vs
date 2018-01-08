@@ -69,7 +69,7 @@ public final class PropertieUtils {
         return Lists.newArrayList(unique);
     }
 
-    private static String getProperty(String propName, String key) {
+    public static String getProperty(String propName, String key) {
         Properties prop = new Properties();
 
         InputStream in = PropertieUtils.class.getClassLoader().getResourceAsStream(propName);

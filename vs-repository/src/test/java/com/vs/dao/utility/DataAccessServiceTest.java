@@ -1,5 +1,6 @@
 package com.vs.dao.utility;
 
+import com.vs.common.domain.HistoricalData;
 import com.vs.common.domain.Stock;
 import org.junit.Assert;
 import org.junit.Test;
@@ -21,5 +22,14 @@ public class DataAccessServiceTest {
 
         stocks = DataAccessService.findAll(Stock.class);
         Assert.assertEquals(0, stocks.size());
+    }
+
+    @Test
+    public void testMem() throws InterruptedException {
+        List<HistoricalData> historicalDataList = DataAccessService.findAll(HistoricalData.class);
+
+        System.out.println(historicalDataList.size());
+
+        Thread.sleep(100000);
     }
 }

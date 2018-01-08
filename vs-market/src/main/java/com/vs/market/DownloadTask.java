@@ -3,7 +3,7 @@ package com.vs.market;
 
 import com.vs.common.domain.HistoricalData;
 import com.vs.common.domain.Stock;
-import com.vs.common.utils.DateUtils;
+import com.vs.common.utils.MarketDataUtils;
 import com.vs.dao.utility.DataAccessService;
 import com.vs.http.analyzer.SinaHistoryAnalyzer;
 import com.vs.http.analyzer.SinaStockAnalyzer;
@@ -15,6 +15,8 @@ import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 /**
  * Created by erix-mac on 15/8/1.
@@ -46,8 +48,8 @@ public class DownloadTask implements Runnable {
         downloadHistoryDataTask(this.code, this.date);
     }
 
-    public static void downloadHistoryDataTask(String code, LocalDate date) {
-        List<HistoricalData> historicalDataList = SinaHistoryAnalyzer.getData(code, date);
+    public static void downloadHistoryDataTask(String code, LocalDate tillDate) {
+        List<HistoricalData> historicalDataList = SinaHistoryAnalyzer.getData(code, tillDate);
         DataAccessService.save(HistoricalData.class, historicalDataList);
     }
 
@@ -58,25 +60,40 @@ public class DownloadTask implements Runnable {
                 break;
             }
 
-            if (isDataExist(code, cur)) {
+            if (isDataNotExist(code, cur)) {
 //                System.out.println(cur);
                 List<HistoricalData> historicalDataList = SinaHistoryAnalyzer.getData(code, cur);
+                if (historicalDataList.size() == 0) {
+                    break;
+                }
                 DataAccessService.save(HistoricalData.class, historicalDataList);
                 cur = cur.minusMonths(3);
             } else {
-                cur = cur.minusMonths(3);
+                Predicate<HistoricalData> criteria = f -> f.getStockCode().equalsIgnoreCase(code);
+                List<HistoricalData> historicalDataList = DataAccessService.findAllBy(HistoricalData.class, criteria).stream().sorted().collect(Collectors.toList());
+                cur = historicalDataList.get(0).getDate().minusDays(1);
             }
         }
     }
 
-    private static boolean isDataExist(String code, LocalDate cur) {
-        return (MarketDataRepository.getMarketCount(code, cur) == 0 && cur == LocalDate.now()) ||
-                (MarketDataRepository.getMarketCount(code, cur.minusDays(1)) == 0 &&
-                        MarketDataRepository.getMarketCount(code, cur.minusDays(2)) == 0 &&
-                        MarketDataRepository.getMarketCount(code, cur.minusDays(3)) == 0 &&
-                        MarketDataRepository.getMarketCount(code, cur.minusDays(4)) == 0 &&
-                        MarketDataRepository.getMarketCount(code, cur.minusDays(5)) == 0 &&
-                        MarketDataRepository.getMarketCount(code, cur.minusDays(6)) == 0);
+    private static boolean isDataNotExist(String code, LocalDate cur) {
+        if (MarketDataUtils.isTradingDate(cur)) {
+            return MarketDataRepository.getMarketCount(code, cur) == 0;
+        } else {
+            cur = MarketDataUtils.getPreTradeDate(cur);
+            return MarketDataRepository.getMarketCount(code, cur) == 0;
+        }
+//        return (MarketDataRepository.getMarketCount(code, cur) == 0 && cur == LocalDate.now()) ||
+//                (MarketDataRepository.getMarketCount(code, cur) == 0 &&
+//                        MarketDataRepository.getMarketCount(code, cur.minusDays(1)) == 0 &&
+//                        MarketDataRepository.getMarketCount(code, cur.minusDays(2)) == 0 &&
+//                        MarketDataRepository.getMarketCount(code, cur.minusDays(3)) == 0 &&
+//                        MarketDataRepository.getMarketCount(code, cur.minusDays(4)) == 0 &&
+//                        MarketDataRepository.getMarketCount(code, cur.minusDays(5)) == 0 &&
+//                        MarketDataRepository.getMarketCount(code, cur.minusDays(6)) == 0 &&
+//                        MarketDataRepository.getMarketCount(code, cur.minusDays(7)) == 0 &&
+//                        MarketDataRepository.getMarketCount(code, cur.minusDays(8)) == 0 &&
+//                        MarketDataRepository.getMarketCount(code, cur.minusDays(9)) == 0);
     }
 
     public static void downloadStockTask() {
