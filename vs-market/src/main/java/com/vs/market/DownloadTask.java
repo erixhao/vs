@@ -2,8 +2,11 @@ package com.vs.market;
 
 
 import com.vs.common.domain.HistoricalData;
+import com.vs.common.domain.MarketData;
 import com.vs.common.domain.Stock;
+import com.vs.common.domain.enums.Market;
 import com.vs.common.utils.DateUtils;
+import com.vs.common.utils.MarketDataUtils;
 import com.vs.dao.utility.DataAccessService;
 import com.vs.http.analyzer.SinaHistoryAnalyzer;
 import com.vs.http.analyzer.SinaStockAnalyzer;
@@ -13,7 +16,9 @@ import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
+import java.time.DayOfWeek;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -46,8 +51,8 @@ public class DownloadTask implements Runnable {
         downloadHistoryDataTask(this.code, this.date);
     }
 
-    public static void downloadHistoryDataTask(String code, LocalDate date) {
-        List<HistoricalData> historicalDataList = SinaHistoryAnalyzer.getData(code, date);
+    public static void downloadHistoryDataTask(String code, LocalDate tillDate) {
+        List<HistoricalData> historicalDataList = SinaHistoryAnalyzer.getData(code, tillDate);
         DataAccessService.save(HistoricalData.class, historicalDataList);
     }
 
@@ -61,6 +66,9 @@ public class DownloadTask implements Runnable {
             if (isDataExist(code, cur)) {
 //                System.out.println(cur);
                 List<HistoricalData> historicalDataList = SinaHistoryAnalyzer.getData(code, cur);
+                if (historicalDataList.size() == 0) {
+                    break;
+                }
                 DataAccessService.save(HistoricalData.class, historicalDataList);
                 cur = cur.minusMonths(3);
             } else {
@@ -70,13 +78,23 @@ public class DownloadTask implements Runnable {
     }
 
     private static boolean isDataExist(String code, LocalDate cur) {
-        return (MarketDataRepository.getMarketCount(code, cur) == 0 && cur == LocalDate.now()) ||
-                (MarketDataRepository.getMarketCount(code, cur.minusDays(1)) == 0 &&
-                        MarketDataRepository.getMarketCount(code, cur.minusDays(2)) == 0 &&
-                        MarketDataRepository.getMarketCount(code, cur.minusDays(3)) == 0 &&
-                        MarketDataRepository.getMarketCount(code, cur.minusDays(4)) == 0 &&
-                        MarketDataRepository.getMarketCount(code, cur.minusDays(5)) == 0 &&
-                        MarketDataRepository.getMarketCount(code, cur.minusDays(6)) == 0);
+        if(MarketDataUtils.isTradingDate(cur)){
+            return MarketDataRepository.getMarketCount(code, cur) == 0;
+        }else{
+            cur = MarketDataUtils.getPreTradeDate(cur);
+            return MarketDataRepository.getMarketCount(code, cur) == 0;
+        }
+//        return (MarketDataRepository.getMarketCount(code, cur) == 0 && cur == LocalDate.now()) ||
+//                (MarketDataRepository.getMarketCount(code, cur) == 0 &&
+//                        MarketDataRepository.getMarketCount(code, cur.minusDays(1)) == 0 &&
+//                        MarketDataRepository.getMarketCount(code, cur.minusDays(2)) == 0 &&
+//                        MarketDataRepository.getMarketCount(code, cur.minusDays(3)) == 0 &&
+//                        MarketDataRepository.getMarketCount(code, cur.minusDays(4)) == 0 &&
+//                        MarketDataRepository.getMarketCount(code, cur.minusDays(5)) == 0 &&
+//                        MarketDataRepository.getMarketCount(code, cur.minusDays(6)) == 0 &&
+//                        MarketDataRepository.getMarketCount(code, cur.minusDays(7)) == 0 &&
+//                        MarketDataRepository.getMarketCount(code, cur.minusDays(8)) == 0 &&
+//                        MarketDataRepository.getMarketCount(code, cur.minusDays(9)) == 0);
     }
 
     public static void downloadStockTask() {
