@@ -26,7 +26,7 @@ import java.util.stream.Collectors;
 @Setter
 @Slf4j
 public class DownloadTask implements Runnable {
-    private static final LocalDate START_TIME = LocalDate.of(1999, 1, 1);
+    private static final LocalDate START_TIME = LocalDate.of(1990, 1, 1);// Shanghai market starts @1990
 
     private String code;
     private LocalDate date;
@@ -61,7 +61,6 @@ public class DownloadTask implements Runnable {
             }
 
             if (isDataNotExist(code, cur)) {
-//                System.out.println(cur);
                 List<HistoricalData> historicalDataList = SinaHistoryAnalyzer.getData(code, cur);
                 if (historicalDataList.size() == 0) {
                     break;
@@ -83,17 +82,6 @@ public class DownloadTask implements Runnable {
             cur = MarketDataUtils.getPreTradeDate(cur);
             return MarketDataRepository.getMarketCount(code, cur) == 0;
         }
-//        return (MarketDataRepository.getMarketCount(code, cur) == 0 && cur == LocalDate.now()) ||
-//                (MarketDataRepository.getMarketCount(code, cur) == 0 &&
-//                        MarketDataRepository.getMarketCount(code, cur.minusDays(1)) == 0 &&
-//                        MarketDataRepository.getMarketCount(code, cur.minusDays(2)) == 0 &&
-//                        MarketDataRepository.getMarketCount(code, cur.minusDays(3)) == 0 &&
-//                        MarketDataRepository.getMarketCount(code, cur.minusDays(4)) == 0 &&
-//                        MarketDataRepository.getMarketCount(code, cur.minusDays(5)) == 0 &&
-//                        MarketDataRepository.getMarketCount(code, cur.minusDays(6)) == 0 &&
-//                        MarketDataRepository.getMarketCount(code, cur.minusDays(7)) == 0 &&
-//                        MarketDataRepository.getMarketCount(code, cur.minusDays(8)) == 0 &&
-//                        MarketDataRepository.getMarketCount(code, cur.minusDays(9)) == 0);
     }
 
     public static void downloadStockTask() {
@@ -102,8 +90,8 @@ public class DownloadTask implements Runnable {
     }
 
     public static void main(String[] args) {
-        downloadStockTask();
-//        downloadHistoryDataTask("601318");
+        //downloadStockTask();
+        downloadHistoryDataTask("600030");
     }
 
 }
