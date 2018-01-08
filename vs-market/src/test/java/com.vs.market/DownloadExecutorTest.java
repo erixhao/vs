@@ -12,10 +12,10 @@ import java.time.LocalDate;
 import java.util.List;
 
 public class DownloadExecutorTest {
-//    @Test
-//    public void loadAll(){
-//        DownloadExecutor.downloadAll();
-//    }
+    @Test
+    public void loadAll(){
+        DownloadExecutor.downloadAll();
+    }
 
 //    @Test
 //    public void loadAllMarketData() {

@@ -2,6 +2,7 @@ package com.vs.dao.utility;
 
 import com.google.common.collect.Lists;
 import com.vs.common.domain.Entity;
+import com.vs.common.utils.PropertieUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
@@ -16,34 +17,13 @@ public class FileUtil {
     private static String path;
     private static boolean isBackup;
 
-    private static String getPath() {
-        InputStream in = FileUtil.class.getResourceAsStream("/config.properties");
 
-        Reader f = new InputStreamReader(in);
-        BufferedReader fb = new BufferedReader(f);
-        String line = null;
-        try {
-            line = fb.readLine();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return line.split("=")[1];
+    private static String getPath() {
+        return PropertieUtils.getProperty("config.properties", "db.file.path");
     }
 
     private static boolean getBackupFlag() {
-//        System.out.println(FileUtil.class.getResource("/config.properties").getPath().toString());
-        InputStream in = FileUtil.class.getResourceAsStream("/config.properties");
-
-        Reader f = new InputStreamReader(in);
-        BufferedReader fb = new BufferedReader(f);
-        String line = null;
-        try {
-            line = fb.readLine();
-            line = fb.readLine();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return Boolean.valueOf(line.split("=")[1]).booleanValue();
+        return Boolean.valueOf(PropertieUtils.getProperty("config.properties", "db.file.backup"));
     }
 
     private static String getDataFileName(String fileName) {
