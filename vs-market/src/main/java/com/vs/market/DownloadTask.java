@@ -2,10 +2,7 @@ package com.vs.market;
 
 
 import com.vs.common.domain.HistoricalData;
-import com.vs.common.domain.MarketData;
 import com.vs.common.domain.Stock;
-import com.vs.common.domain.enums.Market;
-import com.vs.common.utils.DateUtils;
 import com.vs.common.utils.MarketDataUtils;
 import com.vs.dao.utility.DataAccessService;
 import com.vs.http.analyzer.SinaHistoryAnalyzer;
@@ -16,10 +13,10 @@ import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
-import java.time.DayOfWeek;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 /**
  * Created by erix-mac on 15/8/1.
@@ -63,7 +60,7 @@ public class DownloadTask implements Runnable {
                 break;
             }
 
-            if (isDataExist(code, cur)) {
+            if (isDataNotExist(code, cur)) {
 //                System.out.println(cur);
                 List<HistoricalData> historicalDataList = SinaHistoryAnalyzer.getData(code, cur);
                 if (historicalDataList.size() == 0) {
@@ -72,15 +69,17 @@ public class DownloadTask implements Runnable {
                 DataAccessService.save(HistoricalData.class, historicalDataList);
                 cur = cur.minusMonths(3);
             } else {
-                cur = cur.minusMonths(3);
+                Predicate<HistoricalData> criteria = f -> f.getStockCode().equalsIgnoreCase(code);
+                List<HistoricalData> historicalDataList = DataAccessService.findAllBy(HistoricalData.class, criteria).stream().sorted().collect(Collectors.toList());
+                cur = historicalDataList.get(0).getDate().minusDays(1);
             }
         }
     }
 
-    private static boolean isDataExist(String code, LocalDate cur) {
-        if(MarketDataUtils.isTradingDate(cur)){
+    private static boolean isDataNotExist(String code, LocalDate cur) {
+        if (MarketDataUtils.isTradingDate(cur)) {
             return MarketDataRepository.getMarketCount(code, cur) == 0;
-        }else{
+        } else {
             cur = MarketDataUtils.getPreTradeDate(cur);
             return MarketDataRepository.getMarketCount(code, cur) == 0;
         }
