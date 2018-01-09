@@ -78,7 +78,7 @@ public class DailyBatch {
 
         List<Transaction> todayTrans = Lists.newArrayList();
         List<String> codes = PropertieUtils.getStockCodeList();
-//TODO need confirm //        this.marketService.updateMarketData(codes,MKT_DAYS);
+        this.marketService.updateMarketData(codes, LocalDate.now().plusDays(MKT_DAYS));
 
         long begin = PerformanceUtils.beginTime("autoTrade");
         List<TradingBook> result = this.traderService.autoTrade(tradWindow, capital,false);

@@ -48,15 +48,14 @@ public class DownloadTask implements Runnable {
         downloadHistoryDataTask(this.code, this.date);
     }
 
-    public static void downloadHistoryDataTask(String code, LocalDate tillDate) {
-        List<HistoricalData> historicalDataList = SinaHistoryAnalyzer.getData(code, tillDate);
-        DataAccessService.save(HistoricalData.class, historicalDataList);
+    public static void downloadHistoryDataTask(String code) {
+        downloadHistoryDataTask(code, START_TIME);
     }
 
-    public static void downloadHistoryDataTask(String code) {
+    public static void downloadHistoryDataTask(String code, LocalDate tillDate) {
         LocalDate cur = LocalDate.now();
         while (true) {
-            if (cur.isBefore(START_TIME)) {
+            if (cur.isBefore(tillDate)) {
                 break;
             }
 
@@ -66,11 +65,10 @@ public class DownloadTask implements Runnable {
                 if (historicalDataList.size() == 0) {
                     break;
                 }
-                DataAccessService.save(HistoricalData.class, historicalDataList);
+                DataAccessService.saveMkt(historicalDataList);
                 cur = cur.minusMonths(3);
             } else {
-                Predicate<HistoricalData> criteria = f -> f.getStockCode().equalsIgnoreCase(code);
-                List<HistoricalData> historicalDataList = DataAccessService.findAllBy(HistoricalData.class, criteria).stream().sorted().collect(Collectors.toList());
+                List<HistoricalData> historicalDataList = DataAccessService.findAllMktBy(code).stream().sorted().collect(Collectors.toList());
                 cur = historicalDataList.get(0).getDate().minusDays(1);
             }
         }
