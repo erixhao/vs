@@ -13,14 +13,30 @@ import java.util.stream.Collectors;
 
 import com.google.common.collect.Lists;
 import com.vs.common.domain.Entity;
+import com.vs.common.domain.HistoricalData;
+import com.vs.common.utils.PropertieUtils;
 
 public class DataAccessService {
-    public static ConcurrentHashMap<Class<?>, List<?>> cache = new ConcurrentHashMap<Class<?>, List<?>>();
+    public static ConcurrentHashMap<String, List<?>> cache = new ConcurrentHashMap<String, List<?>>();
     public static AtomicInteger saveRequest = new AtomicInteger(0);
     public static Thread saveThread = null;
 
-    private static int MAX_PENDING_REQUEST = 100;
-    private static int MAX_SAVE_INTERVAL = 300_000;
+    public static long UPDATE_SIZE = 0;
+    public static long UPDATE_INTERVAL = 0;
+
+    private static long getUpdateSize() {
+        if (UPDATE_SIZE == 0) {
+            UPDATE_SIZE = Long.valueOf(PropertieUtils.getProperty("config.properties", "db.update.size"));
+        }
+        return UPDATE_SIZE;
+    }
+
+    private static long getUpdateInterval() {
+        if (UPDATE_INTERVAL == 0) {
+            UPDATE_INTERVAL = Long.valueOf(PropertieUtils.getProperty("config.properties", "db.update.interval"));
+        }
+        return UPDATE_INTERVAL;
+    }
 
     public static <T extends Entity> List<T> findAll(Class<T> clazz) {
         Predicate<T> criteria = (a -> true);
@@ -71,7 +87,7 @@ public class DataAccessService {
     }
 
     public static <T extends Entity> void write(Class<T> clazz, List<T> items) {
-        cache.put(clazz, items);
+        cache.put(clazz.getSimpleName(), items);
         saveRequest.incrementAndGet();
 //        FileUtil.writeFile(clazz.getSimpleName(), items);
         if (saveThread == null) {
@@ -82,14 +98,72 @@ public class DataAccessService {
     }
 
     public static <T extends Entity> List<T> read(Class<T> clazz) {
-        if (cache.get(clazz) != null) {
-            return (List<T>) cache.get(clazz);
+        if (cache.get(clazz.getSimpleName()) != null) {
+            return (List<T>) cache.get(clazz.getSimpleName());
         } else {
             List<T> result = FileUtil.readFile(clazz.getSimpleName(), clazz);
-            cache.put(clazz, result);
+            cache.put(clazz.getSimpleName(), result);
             return result;
         }
     }
+
+    /*---------------------------------------------*/
+    public static List<HistoricalData> findAllMktBy(String code) {
+        Predicate<HistoricalData> criteria = (a -> true);
+        return findAllMktBy(code, criteria);
+    }
+
+    public static List<HistoricalData> findAllMktBy(String code, Predicate<HistoricalData> criteria) {
+        List<HistoricalData> result = readMkt("HistoricalData_" + code, HistoricalData.class);
+        result = result.stream().filter(criteria).filter(distinctByKey(Entity::getKey)).collect(Collectors.toList());
+        return result;
+    }
+
+    public static void saveMkt(HistoricalData item) {
+        saveMkt(Lists.newArrayList(item));
+    }
+
+    public static void saveMkt(List<HistoricalData> entities) {
+        saveMkt(entities, true);
+    }
+
+    public static void saveMkt(List<HistoricalData> updatedItems, boolean incremental) {
+        String stockCode = updatedItems.get(0).getStockCode();
+        synchronized (HistoricalData.class) {
+            List<HistoricalData> existing = Lists.newArrayList();
+            if (incremental) {
+                existing = findAllMktBy(stockCode);
+                existing.removeAll(updatedItems);
+                existing.addAll(updatedItems);
+            } else {
+                existing = updatedItems;
+            }
+            existing = existing.stream().filter(distinctByKey(Entity::getKey)).collect(Collectors.toList());
+            writeMkt("HistoricalData_" + stockCode, existing);
+        }
+    }
+
+    public static <T extends Entity> void writeMkt(String fileName, List<T> items) {
+        cache.put(fileName, items);
+        saveRequest.incrementAndGet();
+//        FileUtil.writeFile(clazz.getSimpleName(), items);
+        if (saveThread == null) {
+            saveThread = new Thread(new SaveThread());
+            saveThread.setDaemon(true);
+            saveThread.start();
+        }
+    }
+
+    public static <T extends Entity> List<T> readMkt(String fileName, Class<T> clazz) {
+        if (cache.get(fileName) != null) {
+            return (List<T>) cache.get(fileName);
+        } else {
+            List<T> result = FileUtil.readFile(fileName, clazz);
+            cache.put(fileName, result);
+            return result;
+        }
+    }
+    /*---------------------------------------------*/
 
     public static class SaveThread implements Runnable {
         private LocalDateTime lastSaveTime = LocalDateTime.now();
@@ -102,11 +176,11 @@ public class DataAccessService {
         public void run() {
             while (true) {
                 int cur = saveRequest.get();
-                if (cur > MAX_PENDING_REQUEST || Duration.between(lastSaveTime, LocalDateTime.now()).toMillis() > MAX_SAVE_INTERVAL) {
+                if (cur > getUpdateSize() || Duration.between(lastSaveTime, LocalDateTime.now()).toMillis() > getUpdateInterval()) {
                     if (saveRequest.compareAndSet(cur, 0)) {
                         System.out.println("Damon thread saving cache to file now.....");
-                        for (Map.Entry<Class<?>, List<?>> entry : cache.entrySet()) {
-                            FileUtil.writeFile(entry.getKey().getSimpleName(), (List<? extends Entity>) entry.getValue());
+                        for (Map.Entry<String, List<?>> entry : cache.entrySet()) {
+                            FileUtil.writeFile(entry.getKey(), (List<? extends Entity>) entry.getValue());
                         }
                         lastSaveTime = LocalDateTime.now();
                     }

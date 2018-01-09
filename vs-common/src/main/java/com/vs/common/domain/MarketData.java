@@ -33,6 +33,8 @@ public abstract class MarketData extends Entity implements Comparable<MarketData
     //    @MapInfo(name = "updateDate", position = 10)
     protected LocalDate updateDate;
 
+    protected String key = "";
+
     public double getPercentage() {
         if (this.yesterdayClose == 0)
             return 0;
@@ -58,7 +60,10 @@ public abstract class MarketData extends Entity implements Comparable<MarketData
     }
 
     public String getKey() {
-        return this.stockCode + "_" + this.date;
+        if (key.equals("")) {
+            key = this.stockCode + "_" + this.date;
+        }
+        return key;
     }
 
     public int compareTo(@NotNull MarketData o) {

@@ -25,9 +25,7 @@ public class MarketService {
     }
 
     public void updateMarketData(String code, LocalDate date) {
-        while (MarketDataRepository.getMarketCount(code, date) <= 0) {
-            DownloadTask.downloadHistoryDataTask(code, date);
-        }
+        DownloadTask.downloadHistoryDataTask(code, date);
     }
 
     public void updateMarketData(List<String> codes){

@@ -65,21 +65,20 @@ public class DailyBatch {
         Date today = Calendar.getInstance().getTime();
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(today);
-        calendar.add(Calendar.DAY_OF_MONTH, -30*2);
+        calendar.add(Calendar.DAY_OF_MONTH, -30*1);
         // report all T-7 to T trade trans
         LocalDate reportWindow = LocalDate.now();
 
         //TimeWindow tradWindow = new TimeWindow(toMarketDate("2016-04-26"),today,TimePeriod.DAILY);
         //TimeWindow tradWindow = new TimeWindow(toMarketDate("2017-01-01"),today,TimePeriod.DAILY);
 
-        //TimeWindow tradWindow = new TimeWindow(LocalDate.of(2017,1,1), LocalDate.of(2017,12,29),TimePeriod.DAILY);
+        TimeWindow tradWindow = new TimeWindow(LocalDate.of(2017,1,1), LocalDate.of(2017,12,29),TimePeriod.DAILY);
 
-        TimeWindow tradWindow = TimeWindow.getLastMonths(TimePeriod.DAILY,-3);
+//        TimeWindow tradWindow = TimeWindow.getLastMonths(TimePeriod.DAILY,-3);
 
         List<Transaction> todayTrans = Lists.newArrayList();
         List<String> codes = PropertieUtils.getStockCodeList();
-//TODO need confirm //this.marketService.updateMarketData(codes,MKT_DAYS);
-        this.marketService.updateMarketData(codes);
+        this.marketService.updateMarketData(codes, LocalDate.now().plusDays(MKT_DAYS));
 
         long begin = PerformanceUtils.beginTime("autoTrade");
         List<TradingBook> result = this.traderService.autoTrade(tradWindow, capital,false);
