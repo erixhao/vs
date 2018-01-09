@@ -6,7 +6,6 @@ import com.vs.common.utils.DateUtils;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.cglib.core.Local;
 
 import java.time.LocalDate;
 
@@ -71,7 +70,7 @@ public class TimeWindow {
     }
 
     public static TimeWindow getTimeWindow(TimePeriod period, LocalDate end, int year, int month, int day) {
-        LocalDate start = end.minusYears(year).minusMonths(month).minusDays(day);
+        LocalDate start = end.plusYears(year).plusMonths(month).plusDays(day);
         return new TimeWindow(start, end, period);
     }
 }
