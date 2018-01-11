@@ -16,17 +16,17 @@ public class SinaHistoryAnalyzer {
     }
 
     public static List<HistoricalData> getData(String code, LocalDate now) {
+        try {
+            Thread.sleep(1100);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
         int month = now.getMonthValue();
         int quarter = month / 3 + (month % 3 > 0 ? 1 : 0);
         String url = String.format(SINA_HOSTORY_URL, code, now.getYear(), quarter);
         System.out.println(url);
         String content = URLReader.getContext(url, "gb2312");
         List<HistoricalData> histories = analyzer(content, code);
-        try {
-            Thread.sleep(1000);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
         return histories;
     }
 

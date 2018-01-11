@@ -54,21 +54,38 @@ public class DownloadTask implements Runnable {
 
     public static void downloadHistoryDataTask(String code, LocalDate tillDate) {
         LocalDate cur = LocalDate.now();
+        int missing = 0;
         while (true) {
-            if (cur.isBefore(tillDate)) {
-                break;
-            }
-
-            if (isDataNotExist(code, cur)) {
-                List<HistoricalData> historicalDataList = SinaHistoryAnalyzer.getData(code, cur);
-                if (historicalDataList.size() == 0) {
+            try {
+                if (cur.isBefore(tillDate)) {
                     break;
                 }
-                DataAccessService.saveMkt(historicalDataList);
-                cur = cur.minusMonths(3);
-            } else {
-                List<HistoricalData> historicalDataList = DataAccessService.findAllMktBy(code).stream().sorted().collect(Collectors.toList());
-                cur = historicalDataList.get(0).getDate().minusDays(1);
+
+                if (isDataNotExist(code, cur)) {
+                    List<HistoricalData> historicalDataList = SinaHistoryAnalyzer.getData(code, cur);
+                    if (historicalDataList.size() == 0) {
+                        missing++;
+
+                        if (missing > 4) {
+                            break;
+                        }
+                    } else {
+                        missing = 0;
+                        DataAccessService.saveMkt(historicalDataList);
+                    }
+                    cur = cur.minusMonths(3);
+                } else {
+                    missing = 0;
+                    List<HistoricalData> historicalDataList = DataAccessService.findAllMktBy(code).stream().sorted().collect(Collectors.toList());
+                    cur = historicalDataList.get(0).getDate().minusDays(1);
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+                try {
+                    Thread.sleep(300000);
+                } catch (InterruptedException e1) {
+                    e1.printStackTrace();
+                }
             }
         }
     }
