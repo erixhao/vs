@@ -30,6 +30,6 @@ public class DataAccessServiceTest {
 
         System.out.println(historicalDataList.size());
 
-        Thread.sleep(100000);
+//        Thread.sleep(100000);
     }
 }
